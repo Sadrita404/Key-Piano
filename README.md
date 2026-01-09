@@ -4,6 +4,7 @@
 **Try it now!** Click the link above to start playing piano with your computer keyboard instantly - no installation required!
 
 ---
+<img width="1447" height="757" alt="Screenshot 2026-01-10 at 4 40 22 AM" src="https://github.com/user-attachments/assets/6adebd09-cbd0-41cd-8738-1f7598f7d3ef" />
 
 ---
 
