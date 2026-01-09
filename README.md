@@ -1,7 +1,9 @@
 ## Key-Piano
 
-# Live at - 
+# Live at - https://key-piano-sadrita-f81v2eq8k-sadritaneogi-6560s-projects.vercel.app/ 
 **Try it now!** Click the link above to start playing piano with your computer keyboard instantly - no installation required!
+
+---
 
 ---
 
@@ -58,7 +60,7 @@ A beautiful, interactive web-based piano application that lets you play music us
 
 1. **Clone the repository**
    ```bash
-   
+   https://github.com/Sadrita404/Key-Piano.git
    ```
 
 2. **Install dependencies**
