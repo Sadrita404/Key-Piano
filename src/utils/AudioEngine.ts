@@ -97,3 +97,57 @@ export class AudioEngine {
 
     const oscillator = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(
+      isDownbeat ? 1200 : 800,
+      this.audioContext.currentTime
+    );
+
+    // Quick attack and decay for a sharp click
+    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(
+      isDownbeat ? 0.3 : 0.2,
+      this.audioContext.currentTime + 0.01
+    );
+    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(this.metronomeGainNode);
+
+    oscillator.start(this.audioContext.currentTime);
+    oscillator.stop(this.audioContext.currentTime + 0.1);
+  }
+
+  startMetronome(bpm: number, timeSignature: number = 4): void {
+    this.stopMetronome();
+
+    const interval = (60 / bpm) * 1000;
+    let beatCount = 0;
+
+    const scheduleNextBeat = () => {
+      const isDownbeat = beatCount % timeSignature === 0;
+      this.playMetronomeClick(isDownbeat);
+      beatCount++;
+      this.metronomeIntervalId = window.setTimeout(scheduleNextBeat, interval);
+    };
+
+    scheduleNextBeat();
+  }
+
+  stopMetronome(): void {
+    if (this.metronomeIntervalId) {
+      window.clearTimeout(this.metronomeIntervalId);
+      this.metronomeIntervalId = null;
+    }
+  }
+
+  playNote(
+    note: string,
+    velocity: number = 0.7,
+    duration?: number,
+    useReverb: boolean = true
+  ): void {
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
