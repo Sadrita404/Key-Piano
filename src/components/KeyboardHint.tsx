@@ -88,7 +88,8 @@ export const KeyboardHint: React.FC<KeyboardHintProps> = ({
           <p className="text-purple-200 mb-4 text-center">
             Press the highlighted key on your computer keyboard.
           </p>
-            <div className="relative h-40">
+
+          <div className="relative h-40">
             <div className="flex justify-center h-full">
               {pianoKeyLayout.filter(k => k.type === 'white').map(key => {
                 const isHighlighted = searchNoteName === key.note;
@@ -114,3 +115,14 @@ export const KeyboardHint: React.FC<KeyboardHintProps> = ({
             })}
           </div>
         </div>
+
+        <button
+          onClick={onClose}
+          className="w-full mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-semibold"
+        >
+          Got it!
+        </button>
+      </div>
+    </div>
+  );
+};
