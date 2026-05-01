@@ -69,3 +69,31 @@ export class AudioEngine {
     const [, noteName, octaveStr] = match;
     const octave = parseInt(octaveStr);
     const baseFreq = noteFrequencies[noteName] || 440;
+
+
+     const octaveMultiplier = Math.pow(2, octave - 4);
+
+    return baseFreq * octaveMultiplier;
+  }
+
+  private createPianoOscillator(frequency: number): OscillatorNode {
+    const oscillator = this.audioContext.createOscillator();
+
+    // Create a more piano-like sound using multiple harmonics
+    const real = new Float32Array([0, 1, 0.5, 0.3, 0.2, 0.1, 0.05, 0.02]);
+    const imag = new Float32Array(real.length);
+    const customWave = this.audioContext.createPeriodicWave(real, imag);
+
+    oscillator.setPeriodicWave(customWave);
+    oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+
+    return oscillator;
+  }
+
+  private playMetronomeClick(isDownbeat: boolean = false): void {
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
+
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
