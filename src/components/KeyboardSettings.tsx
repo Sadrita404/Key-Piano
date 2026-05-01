@@ -18,3 +18,30 @@ const defaultRows = [
 
 const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C'];
 const solfege = ['do', 're', 'mi', 'fa', 'so', 'la', 'ti', 'do'];
+
+export const KeyboardSettings: React.FC<KeyboardSettingsProps> = ({
+  mapping,
+  onMappingChange
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [tempMapping, setTempMapping] = useState<KeyboardMapping>(mapping);
+
+  const updateRowOctave = (rowIndex: number, octave: number) => {
+    const newMapping = { ...tempMapping };
+    const row = defaultRows[rowIndex];
+
+    row.keys.forEach((key, noteIndex) => {
+      const finalOctave = noteIndex === 7 ? octave + 1 : octave; // Last note is next octave
+      newMapping[key] = { note: notes[noteIndex], octave: finalOctave };
+    });
+
+    setTempMapping(newMapping);
+  };
+
+  const saveMapping = () => {
+    onMappingChange(tempMapping);
+    setIsOpen(false);
+  };
+
+  const resetToDefault = () => {
+    const defaultMapping: KeyboardMapping = {};
