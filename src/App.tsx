@@ -111,4 +111,43 @@ function App() {
   const playNote = useCallback((rawNote: string, duration?: number) => {
     if (!audioEngineRef.current) return;
     const note = normalizeNote(rawNote);
-    
+    // If the duration is provided, it's a song note from autoplay.
+    if (duration) {
+      if (!isMuted) {
+        audioEngineRef.current.playNote(note, volume, duration);
+      }
+      setActiveNotes(prev => new Set(prev).add(note));
+      return; // End here for autoplay notes
+    }
+
+    // Check if we are in practice mode and the note is correct
+    if (isPracticeMode && currentSong && sampleSongs[currentSong]) {
+      const song = sampleSongs[currentSong];
+      // Make sure we're not stuck on a rest (though the useEffect should handle this)
+      if (song.notes[currentNoteIndex] === 'rest') return;
+
+      const expectedNote = normalizeNote(song.notes[currentNoteIndex]);
+
+      if (note === expectedNote) {
+        // Calculate the note's duration based on the song's tempo
+        const beatDuration = song.durations[currentNoteIndex];
+        const noteDurationMs = beatDuration * (60 / metronomeBPM) * 1000;
+
+        // Play the audio and visuals for the correct duration
+        audioEngineRef.current.playNote(note, volume, noteDurationMs);
+        setActiveNotes(prev => new Set(prev).add(note));
+
+        const releaseBuffer = 50;
+        setTimeout(() => {
+          stopNote(note);
+        }, noteDurationMs - releaseBuffer);
+
+        // Advance to the next note in the song
+        setCurrentNoteIndex(prev => prev + 1);
+
+        if (currentNoteIndex + 1 >= song.notes.length) {
+          setIsPracticeMode(false);
+        }
+        return; // Handled, so we exit
+      }
+    }
