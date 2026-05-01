@@ -27,3 +27,32 @@ function App() {
   const [showMobileControls, setShowMobileControls] = useState(false);
 
   const [keyboardMapping, setKeyboardMapping] = useState<KeyboardMapping>(() => {
+
+     // Initialize with default mapping
+    const mapping: KeyboardMapping = {};
+    Object.entries(defaultNoteMapping).forEach(([key, note]) => {
+      const qwertyKeys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i'];
+      const asdfKeys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k'];
+      const zxcvKeys = ['z', 'x', 'c', 'v', 'b', 'n', 'm', ','];
+
+      let baseOctave = 3;
+      if (asdfKeys.includes(key)) baseOctave = 4;
+      if (zxcvKeys.includes(key)) baseOctave = 5;
+
+      // Handle octave completion notes
+      const isOctaveCompletion = ['i', 'k', ','].includes(key);
+      const finalOctave = isOctaveCompletion ? baseOctave + 1 : baseOctave;
+      mapping[key] = { note, octave: finalOctave };
+    });
+    return mapping;
+  });
+
+  const audioEngineRef = useRef<AudioEngine | null>(null);
+  const pressedKeys = useRef<Set<string>>(new Set());
+  const activeKeyToNoteMap = useRef<Map<string, string>>(new Map());
+  const songTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    audioEngineRef.current = new AudioEngine();
+    return () => { audioEngineRef.current?.dispose(); };
+  }, []);
