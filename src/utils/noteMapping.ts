@@ -10,8 +10,8 @@ export const noteMapping: { [key: string]: string } = {
   'y': 'A',
   'u': 'B',
   'i': 'C',
-
-   // Second row (ASDFGHJ) - Next octave (do re mi fa so la ti do)
+  
+  // Second row (ASDFGHJ) - Next octave (do re mi fa so la ti do)
   'a': 'C',
   's': 'D',
   'd': 'E',
@@ -31,7 +31,6 @@ export const noteMapping: { [key: string]: string } = {
   'm': 'B',
   ',': 'C'
 };
-
 
 export const getRowOctave = (key: string): number => {
   const qwertyKeys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i'];
