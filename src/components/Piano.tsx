@@ -1,4 +1,4 @@
-/ src/components/Piano.ts
+// src/components/Piano.ts
 
 import React, { useMemo } from 'react';
 import { normalizeNote } from '../utils/musicUtils';
@@ -21,7 +21,7 @@ const blackKeyBlock = [
   { note: 'A#', flatNote: 'Bb', position: 296 },  // Between A and B
 ];
 
-xport const Piano: React.FC<PianoProps> = ({ activeNotes, onNotePlay, onNoteStop, timingFeedback = {} }) => {
+export const Piano: React.FC<PianoProps> = ({ activeNotes, onNotePlay, onNoteStop, timingFeedback = {} }) => {
   const octaves = [3, 4, 5];
 
   const normalizedActiveNotes = useMemo(() => {
@@ -40,6 +40,11 @@ xport const Piano: React.FC<PianoProps> = ({ activeNotes, onNotePlay, onNoteStop
     }
     return normalizedObj;
   }, [timingFeedback]);
+
+  // Checks the piano's note against the PRE-NORMALIZED set.
+  const isNoteActive = (note: string) => {
+    return normalizedActiveNotes.has(normalizeNote(note));
+  };
 
   // Looks up the piano's note in the PRE-NORMALIZED feedback object.
   const getNoteFeedback = (note: string) => {
@@ -94,3 +99,47 @@ xport const Piano: React.FC<PianoProps> = ({ activeNotes, onNotePlay, onNoteStop
               </div>
             ))}
           </div>
+
+          {/* Black Keys */}
+          <div className="absolute top-0 left-0 flex pointer-events-none">
+            {octaves.map((octave, octaveIndex) => (
+              <div key={octave} className="relative">
+                {blackKeyBlock.map(({ note, flatNote, position }) => {
+                  const absolutePosition = octaveIndex * octaveWidth + position;
+                  const sharpNoteFull = `${note}${octave}`;
+                  const flatNoteFull = `${flatNote}${octave}`;
+
+                  const feedback = getNoteFeedback(sharpNoteFull);
+                  const isActive = isNoteActive(sharpNoteFull) || isNoteActive(flatNoteFull);
+
+                  return (
+                    <button
+                      key={sharpNoteFull}
+                      className={`
+                        absolute w-8 h-24 rounded-b-lg transition-all duration-75 transform pointer-events-auto
+                        border border-gray-900 shadow-lg
+                        ${feedback === 'correct' ? 'bg-purple-600 border-purple-700 scale-95 shadow-purple-600/50' : ''}
+                        ${feedback === 'incorrect' ? 'bg-red-400 border-red-500 shadow-red-500/50' : ''}
+                        ${!feedback && isActive ? 'bg-purple-600 border-purple-700 scale-95 shadow-purple-600/50' : ''}
+                        ${!feedback && !isActive ? 'bg-gray-900 hover:bg-gray-800 active:scale-95' : ''}
+                      `}
+                      style={{ left: `${absolutePosition}px`, zIndex: 10 }}
+                      onMouseDown={() => handleMouseDown(note, octave)}
+                      onMouseUp={() => handleMouseUp(note, octave)}
+                      onMouseLeave={() => handleMouseUp(note, octave)}
+                    >
+                      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 text-xs font-medium text-white text-center leading-tight">
+                        <div>{sharpNoteFull}</div>
+                        <div>{flatNoteFull}</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
