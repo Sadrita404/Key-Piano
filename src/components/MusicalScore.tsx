@@ -380,4 +380,46 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
           </div>
         )}
       </div>
-      
+
+
+      {/* Musical Staff */}
+      <div
+        ref={notesContainerRef}
+        className="bg-white/10 rounded-lg p-4 overflow-x-auto flex-1 scroll-smooth"
+      >
+        <div className="min-w-max relative" style={{ height: '120px' }}>
+          {/* Staff Lines Background */}
+          <svg width="100%" height="120" className="absolute top-0 left-0" style={{ zIndex: 1 }}>
+            {/* Main staff lines */}
+            {[20, 32, 44, 56, 68].map((y, index) => (
+              <line
+                key={`staff-${index}`}
+                x1="0"
+                y1={y}
+                x2="100%"
+                y2={y}
+                stroke="#e5e7eb"
+                strokeWidth="1"
+              />
+            ))}
+
+            {/* Treble clef */}
+            <text x="10" y="50" fontSize="48" fill="#e5e7eb" fontFamily="serif">𝄞</text>
+
+            {/* Time signature */}
+            <text x="60" y="35" fontSize="20" fill="#e5e7eb" fontWeight="bold">4</text>
+            <text x="60" y="55" fontSize="20" fill="#e5e7eb" fontWeight="bold">4</text>
+          </svg>
+
+          {/* Notes */}
+          <div className="flex gap-4 ml-20 relative" style={{ zIndex: 2 }}>
+            {songData.notes.map((note, index) => {
+              const isCurrentNote = index === currentNoteIndex;
+              const isPastNote = index < currentNoteIndex;
+              const isRest = note === 'rest';
+              const isWaitingNote = isPracticeMode && isCurrentNote;
+
+              const { base, accidental } = parseNoteSymbol(note);
+              const accidentalSymbol = accidental === "#" ? "♯" : accidental === "b" ? "♭" : "";
+
+              const staffPos = getStaffPosition(note);
