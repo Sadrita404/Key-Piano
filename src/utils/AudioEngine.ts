@@ -185,3 +185,46 @@ export class AudioEngine {
     }
 
     oscillator.connect(gainNode);
+
+     if (useReverb && this.reverbNode) {
+      const dryGain = this.audioContext.createGain();
+      const wetGain = this.audioContext.createGain();
+
+      dryGain.gain.value = 0.7;
+      wetGain.gain.value = 0.3;
+
+      gainNode.connect(dryGain);
+      gainNode.connect(wetGain);
+
+      dryGain.connect(this.masterGainNode);
+      wetGain.connect(this.reverbNode);
+    } else {
+      gainNode.connect(this.masterGainNode);
+    }
+
+    oscillator.start();
+
+    if (duration) {
+      oscillator.stop(this.audioContext.currentTime + duration / 1000);
+    }
+
+    this.oscillators.set(note, oscillator);
+    this.gainNodes.set(note, gainNode);
+  }
+
+  stopNote(note: string): void {
+    const oscillator = this.oscillators.get(note);
+    const gainNode = this.gainNodes.get(note);
+
+    if (oscillator && gainNode) {
+        // Natural release
+      gainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.3);
+      oscillator.stop(this.audioContext.currentTime + 0.3);
+
+      this.oscillators.delete(note);
+      this.gainNodes.delete(note);
+    }
+  }
+
+  
