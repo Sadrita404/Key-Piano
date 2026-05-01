@@ -41,3 +41,18 @@ export const sampleSongs: { [key: string]: { notes: string[]; durations: number[
       1, 1, 1, 1, 2
     ]
   },
+
+  "Ode to Joy": {
+    notes: [
+      "E4", "E4", "F4", "G4", "G4", "F4", "E4", "D4",
+      "C4", "C4", "D4", "E4", "E4", "D4", "D4", "rest",
+      "E4", "E4", "F4", "G4", "G4", "F4", "E4", "D4",
+      "C4", "C4", "D4", "E4", "D4", "C4", "C4"
+    ],
+    durations: [
+      1, 1, 1, 1, 1, 1, 1, 1,
+      1, 1, 1, 1, 1.5, 0.5, 2, 1,
+      1, 1, 1, 1, 1, 1, 1, 1,
+      1, 1, 1, 1, 1, 1, 2
+    ]
+  },
