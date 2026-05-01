@@ -119,3 +119,60 @@ export const KeyboardSettings: React.FC<KeyboardSettingsProps> = ({
                     </select>
                   </div>
                 </div>
+
+                 <div className="grid grid-cols-8 gap-2">
+                  {row.keys.map((key, noteIndex) => {
+                    const displayOctave = noteIndex === 7 ? currentOctave + 1 : currentOctave;
+
+                    return (
+                      <div key={key} className="text-center">
+                        <div className="bg-white text-gray-800 w-10 h-10 rounded flex items-center justify-center font-bold text-sm mb-1">
+                          {key.toUpperCase()}
+                        </div>
+                        <div className="text-xs text-purple-200">
+                          <div className="font-medium">{notes[noteIndex]}{displayOctave}</div>
+                          <div className="text-purple-300 italic">{solfege[noteIndex]}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={saveMapping}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+          >
+            <Save className="w-4 h-4" />
+            Save Settings
+          </button>
+
+          <button
+            onClick={resetToDefault}
+            className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Reset to Default
+          </button>
+
+          <button
+            onClick={() => setIsOpen(false)}
+            className="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+
+        <div className="mt-4 text-sm text-purple-300">
+          <p>• Each row can be set to a different base octave</p>
+          <p>• The last key in each row (I, K, comma) plays the next octave's "do"</p>
+          <p>• Hold Shift for sharps (#) or Alt/Option for flats (♭)</p>
+        </div>
+      </div>
+    </div>
+  );
+};
