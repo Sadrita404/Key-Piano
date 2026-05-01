@@ -88,3 +88,29 @@ export const KeyboardHint: React.FC<KeyboardHintProps> = ({
           <p className="text-purple-200 mb-4 text-center">
             Press the highlighted key on your computer keyboard.
           </p>
+            <div className="relative h-40">
+            <div className="flex justify-center h-full">
+              {pianoKeyLayout.filter(k => k.type === 'white').map(key => {
+                const isHighlighted = searchNoteName === key.note;
+                return (
+                  <div key={key.computerKey} className={`w-12 h-full border-2 border-slate-500 rounded-b-lg flex flex-col justify-end items-center p-2 transition-all ${isHighlighted ? 'bg-yellow-400 text-black animate-pulse scale-105 shadow-lg shadow-yellow-400/50' : 'bg-white text-slate-600'}`}>
+                    <span className="text-2xl font-bold">{key.computerKey.toUpperCase()}</span>
+                    <span className="text-xs">{key.note}{targetOctave}</span>
+                  </div>
+                );
+              })}
+            </div>
+            {pianoKeyLayout.filter(k => k.type === 'black').map(key => {
+              const isHighlighted = searchNoteName === key.note;
+              return (
+                <div key={key.computerKey} className={`absolute top-0 w-8 h-24 border-2 border-slate-900 rounded-b-lg flex flex-col justify-end items-center p-1 z-10 transition-all text-center leading-tight ${isHighlighted ? 'bg-yellow-400 text-black animate-pulse scale-105 shadow-lg shadow-yellow-400/50' : 'bg-black text-white'}`} style={{ left: `calc(50% - (3.5 * 3rem) + (${key.position!} * 3rem))` }}>
+                  <span className="text-xl font-bold mb-1">{key.computerKey.toUpperCase()}</span>
+                  <div className="text-[10px] font-medium">
+                    <div>{key.note}{targetOctave}</div>
+                    <div>{key.flatNote}{targetOctave}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
