@@ -20,3 +20,23 @@ const blackKeyBlock = [
   { note: 'G#', flatNote: 'Ab', position: 244 },  // Between G and A
   { note: 'A#', flatNote: 'Bb', position: 296 },  // Between A and B
 ];
+
+xport const Piano: React.FC<PianoProps> = ({ activeNotes, onNotePlay, onNoteStop, timingFeedback = {} }) => {
+  const octaves = [3, 4, 5];
+
+  const normalizedActiveNotes = useMemo(() => {
+    const normalizedSet = new Set<string>();
+    activeNotes.forEach(note => {
+      normalizedSet.add(normalizeNote(note));
+    });
+    return normalizedSet;
+  }, [activeNotes]);
+
+  // This does the same for the keys of the timingFeedback object.
+  const normalizedTimingFeedback = useMemo(() => {
+    const normalizedObj: { [key: string]: 'correct' | 'incorrect' | null } = {};
+    for (const key in timingFeedback) {
+      normalizedObj[normalizeNote(key)] = timingFeedback[key];
+    }
+    return normalizedObj;
+  }, [timingFeedback]);
