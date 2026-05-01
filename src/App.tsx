@@ -83,3 +83,32 @@ function App() {
       return newSet;
     });
   }, []);
+
+
+  // Automatically skip 'rest' notes in practice mode
+  useEffect(() => {
+    // We only run this logic in practice mode with a valid song
+    if (isPracticeMode && currentSong && sampleSongs[currentSong]) {
+      const song = sampleSongs[currentSong];
+
+      // Ensure we're not at the end of the song
+      if (currentNoteIndex < song.notes.length) {
+        const currentNote = song.notes[currentNoteIndex];
+
+        // If the current note is a rest, schedule a skip
+        if (currentNote === 'rest') {
+          const beatDuration = song.durations[currentNoteIndex];
+          const restDurationMs = beatDuration * (60 / metronomeBPM) * 1000;
+          const timer = setTimeout(() => {
+            setCurrentNoteIndex(prev => prev + 1);
+          }, restDurationMs);
+          return () => clearTimeout(timer);
+        }
+      }
+    }
+  }, [currentNoteIndex, isPracticeMode, currentSong, metronomeBPM]);
+
+  const playNote = useCallback((rawNote: string, duration?: number) => {
+    if (!audioEngineRef.current) return;
+    const note = normalizeNote(rawNote);
+    
