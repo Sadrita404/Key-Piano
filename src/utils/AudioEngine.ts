@@ -151,3 +151,37 @@ export class AudioEngine {
     if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();
     }
+
+     // Stop existing note if playing
+    this.stopNote(note);
+
+    const frequency = this.getFrequency(note);
+    const oscillator = this.createPianoOscillator(frequency);
+    const gainNode = this.audioContext.createGain();
+
+    // Convert MIDI-style velocity (0-1) to gain
+    const volume = Math.pow(velocity, 2) * 0.3; // Quadratic scaling for more natural feel
+
+    // Piano-like envelope: quick attack, slower decay
+    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.01);
+
+    if (duration) {
+      // Natural piano decay
+      gainNode.gain.exponentialRampToValueAtTime(
+        volume * 0.1,
+        this.audioContext.currentTime + duration / 1000 * 0.3
+      );
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.001,
+        this.audioContext.currentTime + duration / 1000
+      );
+    } else {
+      // Sustain with slow decay
+      gainNode.gain.exponentialRampToValueAtTime(
+        volume * 0.7,
+        this.audioContext.currentTime + 2
+      );
+    }
+
+    oscillator.connect(gainNode);
