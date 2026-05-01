@@ -227,4 +227,57 @@ export class AudioEngine {
     }
   }
 
-  
+  setMasterVolume(volume: number): void {
+    this.masterGainNode.gain.setValueAtTime(
+      Math.max(0, Math.min(1, volume)),
+      this.audioContext.currentTime
+    );
+  }
+
+  playChord(notes: string[], velocity: number = 0.7, duration?: number): void {
+    notes.forEach(note => {
+      this.playNote(note, velocity * 0.8, duration); // Slightly reduce individual note volumes
+    });
+  }
+
+  stopAllNotes(): void {
+    this.oscillators.forEach((_, note) => {
+      this.stopNote(note);
+    });
+  }
+
+  // For recording/playback functionality
+  async recordAudio(durationMs: number): Promise<AudioBuffer> {
+    const mediaStreamDestination = this.audioContext.createMediaStreamDestination();
+    this.masterGainNode.connect(mediaStreamDestination);
+
+    const mediaRecorder = new MediaRecorder(mediaStreamDestination.stream);
+    const chunks: Blob[] = [];
+
+    return new Promise((resolve, reject) => {
+      mediaRecorder.ondataavailable = (event) => chunks.push(event.data);
+      mediaRecorder.onstop = async () => {
+        try {
+          const blob = new Blob(chunks, { type: 'audio/wav' });
+          const arrayBuffer = await blob.arrayBuffer();
+          const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+          resolve(audioBuffer);
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      mediaRecorder.start();
+      setTimeout(() => mediaRecorder.stop(), durationMs);
+    });
+  }
+
+  dispose(): void {
+    this.stopMetronome();
+    this.stopAllNotes();
+
+    if (this.audioContext.state !== 'closed') {
+      this.audioContext.close();
+    }
+  }
+}
