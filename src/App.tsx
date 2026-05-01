@@ -240,4 +240,93 @@ function App() {
       setCurrentNoteIndex(noteIndex);
       const note = song.notes[noteIndex];
       const duration = song.durations[noteIndex] * beatDurationMs;
-      
+
+      // Check if this note is the same as the previous note (for articulation)
+      const previousNote = noteIndex > 0 ? song.notes[noteIndex - 1] : null;
+      const isRepeatedNote = note === previousNote && note !== 'rest';
+
+      // Only play automatic song notes when not in practice mode
+      if (note !== 'rest' && !isMuted && !isPracticeMode) {
+        if (isRepeatedNote) {
+          // For repeated notes, add a brief gap for articulation
+          const articulationGap = Math.min(50, duration * 0.1); // 10% of duration or 50ms, whichever is smaller
+          const actualNoteDuration = duration - articulationGap;
+
+          // Stop the previous note first (if it's still playing)
+          stopNote(note);
+
+          // Small delay before playing the new note
+          setTimeout(() => {
+            playNote(note, actualNoteDuration);
+            setTimeout(() => stopNote(note), actualNoteDuration);
+          }, articulationGap);
+        } else {
+          // Normal note playing
+          playNote(note, duration);
+          setTimeout(() => stopNote(note), duration);
+        }
+      }
+
+      noteIndex++;
+      songTimeoutRef.current = window.setTimeout(playNextNote, duration);
+    };
+
+    playNextNote();
+  }, [playNote, stopNote, isMuted, isPracticeMode, metronomeBPM]);
+
+  const handleTogglePlay = () => {
+    if (isPlaying) {
+      // Stop current song
+      if (songTimeoutRef.current) {
+        clearTimeout(songTimeoutRef.current);
+      }
+      setIsPlaying(false);
+      setIsPracticeMode(false);
+      setCurrentNoteIndex(0);
+    } else if (currentSong) {
+      // Resume or restart current song
+      setIsPracticeMode(false);
+      playSong(sampleSongs[currentSong]);
+    }
+  };
+
+  const handleToggleMute = () => {
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+
+    if (newMutedState && currentSong) {
+      // Entering practice mode
+      setIsPracticeMode(true);
+      setIsPlaying(false);
+      setCurrentNoteIndex(0);
+      if (songTimeoutRef.current) {
+        clearTimeout(songTimeoutRef.current);
+      }
+    } else {
+      // Exiting practice mode
+      setIsPracticeMode(false);
+    }
+  };
+
+  const handleSongSelect = (songName: string) => {
+    // Stop any currently playing song
+    if (songTimeoutRef.current) {
+      clearTimeout(songTimeoutRef.current);
+    }
+    setIsPlaying(false);
+    setCurrentNoteIndex(0);
+    setIsPracticeMode(false);
+    setCurrentSong(songName);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="container mx-auto px-2 py-2 flex flex-col min-h-screen">
+        {/* Header */}
+        <div className="text-center mb-2">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Music className="w-5 h-5 text-purple-400" />
+            <h1 className="text-xl font-bold text-white">Key-Piano</h1>
+          </div>
+          <p className="text-xs text-purple-200">Play music using your computer keyboard By Sadrita Neogi</p>
+        </div>
