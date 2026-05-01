@@ -112,3 +112,33 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
     if (duration >= 0.0625) return '𝅀'; // Thirty-second rest
     return '𝅁'; // Sixty-fourth rest or shorter
   };
+
+  const getStaffPosition = (note: string): { top: number; needsLedger: boolean; ledgerLines: number[] } => {
+    const { base, accidental, octave } = parseNoteSymbol(note);
+
+    if (note === 'rest') {
+      return { top: 44, needsLedger: false, ledgerLines: [] };
+    }
+
+    // Define the position of middle C (C4) - this is our reference point
+    const middleCPosition = 70; // Position of middle C (ledger line below staff)
+
+    // Define the distance between staff lines (in pixels)
+    const lineSpacing = 12;
+
+    // Define note positions relative to middle C
+    // Each step up or down in the musical alphabet moves by half a line spacing (6px)
+    const notePositions: Record<string, number> = {
+      'C': 0,
+      'C#': 0, 'Db': 0,
+      'D': -1,
+      'D#': -1, 'Eb': -1,
+      'E': -2,
+      'F': -3,
+      'F#': -3, 'Gb': -3,
+      'G': -4,
+      'G#': -4, 'Ab': -4,
+      'A': -5,
+      'A#': -5, 'Bb': -5,
+      'B': -6
+    };
