@@ -39,6 +39,7 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
   const notesContainerRef = useRef<HTMLDivElement>(null);
   const currentNoteRef = useRef<HTMLDivElement>(null);
 
+  // Auto-scroll to keep current note in center
   useEffect(() => {
     if (autoScroll && currentNoteRef.current && notesContainerRef.current) {
       const container = notesContainerRef.current;
@@ -69,6 +70,7 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
     );
   }
 
+  // Helper: parses note string for display info (e.g., F#4 -> F, #, 4)
   const parseNoteSymbol = (note: string) => {
     if (note === 'rest') return { base: 'Rest', accidental: '', octave: '' };
     const match = note.match(/^([A-G])([#b]?)(\d+)$/);
@@ -113,6 +115,7 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
     return '𝅁'; // Sixty-fourth rest or shorter
   };
 
+  // Fixed: Musical staff position system with proper note positioning
   const getStaffPosition = (note: string): { top: number; needsLedger: boolean; ledgerLines: number[] } => {
     const { base, accidental, octave } = parseNoteSymbol(note);
 
@@ -142,7 +145,9 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
       'A#': -5, 'Bb': -5,
       'B': -6
     };
-     const octaveNum = parseInt(octave);
+
+    // Calculate the octave offset
+    const octaveNum = parseInt(octave);
     const octaveOffset = (4 - octaveNum) * 7; // Each octave has 7 staff positions
 
     // Calculate the note's vertical position
@@ -179,6 +184,7 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
         }
       }
     }
+
     return {
       top: topPosition,
       needsLedger,
@@ -381,7 +387,6 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
         )}
       </div>
 
-
       {/* Musical Staff */}
       <div
         ref={notesContainerRef}
@@ -423,7 +428,7 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
               const accidentalSymbol = accidental === "#" ? "♯" : accidental === "b" ? "♭" : "";
 
               const staffPos = getStaffPosition(note);
-
+              // Use the new ledger line calculation
               const ledgerLines = getLedgerLines(note, staffPos.top);
 
               return (
