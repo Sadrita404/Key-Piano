@@ -306,3 +306,78 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
 
     return ledgerLines;
   };
+
+  return (
+    <div className="bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-xl p-4 h-full flex flex-col">
+      <div className="text-center mb-4">
+        {/* Controls */}
+        <div className="flex justify-center gap-3 mb-4">
+          <button
+            onClick={onTogglePlay}
+            className={`
+              flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm
+              ${isPlaying
+                ? 'bg-red-600 hover:bg-red-700 text-white'
+                : 'bg-green-600 hover:bg-green-700 text-white'
+              }
+            `}
+          >
+            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+            {isPlaying ? 'Stop' : 'Play'}
+          </button>
+
+          <button
+            onClick={onToggleMute}
+            className={`
+              flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm
+              ${isMuted
+                ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }
+            `}
+          >
+            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            {isMuted ? 'Practice Mode' : 'Listen Mode'}
+          </button>
+
+          <button
+            onClick={() => setAutoScroll(!autoScroll)}
+            className={`
+              flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-200 text-sm
+              ${autoScroll
+                ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                : 'bg-gray-600 hover:bg-gray-700 text-white'
+              }
+            `}
+          >
+            <Navigation className="w-4 h-4" />
+            Auto-scroll
+          </button>
+        </div>
+
+        {isMuted && (
+          <div className="bg-orange-900/30 rounded-lg p-2 mb-3">
+            <p className="text-orange-200 text-xs">
+              {isPracticeMode
+                ? `🎯 Practice Mode: Play the highlighted note "${getNoteDisplay(songData.notes[currentNoteIndex])}" to continue!`
+                : '🎯 Practice Mode: Select a song and toggle to practice mode to begin interactive learning!'
+              }
+            </p>
+          </div>
+        )}
+
+        {isPracticeMode && currentNoteIndex >= songData.notes.length && (
+          <div className="bg-green-900/30 rounded-lg p-3 mb-3">
+            <p className="text-green-200 font-semibold text-center">
+              🎉 Congratulations! You completed "{songData.title}"!
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 mx-auto block px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm"
+            >
+              Play Again
+            </button>
+          </div>
+        )}
+      </div>
+      
