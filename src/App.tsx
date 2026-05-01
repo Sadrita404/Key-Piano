@@ -330,3 +330,49 @@ function App() {
           </div>
           <p className="text-xs text-purple-200">Play music using your computer keyboard By Sadrita Neogi</p>
         </div>
+
+        {/* Mobile Controls Toggle */}
+        <div className="lg:hidden mb-2">
+          <button
+            onClick={() => setShowMobileControls(!showMobileControls)}
+            className="w-full p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg flex items-center justify-center gap-2"
+          >
+            {showMobileControls ? (
+              <>
+                <EyeOff className="w-4 h-4" />
+                Hide Controls
+              </>
+            ) : (
+              <>
+                <Eye className="w-4 h-4" />
+                Show Controls
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Main Content - Responsive Layout */}
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-3 gap-2 min-h-0">
+          {/* Left Column - Controls and Songs (Desktop) */}
+          <div className="hidden lg:flex flex-col space-y-3">
+            {/* Desktop Controls */}
+            <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-xl p-3">
+              <div className="grid grid-cols-2 gap-3">
+                {/* Volume Control */}
+                <div>
+                  <label className="block text-xs font-medium text-purple-300 mb-1">
+                    <div className="flex items-center gap-1">
+                      <Volume2 className="w-3 h-3" />
+                      Vol: {Math.round(volume * 100)}%
+                    </div>
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={volume}
+                    onChange={(e) => setVolume(parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                </div>
