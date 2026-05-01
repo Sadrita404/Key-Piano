@@ -424,4 +424,138 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
 
               const staffPos = getStaffPosition(note);
 
-              
+              const ledgerLines = getLedgerLines(note, staffPos.top);
+
+              return (
+                <div
+                  ref={isCurrentNote ? currentNoteRef : null}
+                  key={index}
+                  className={`
+                    relative flex flex-col items-center transition-all duration-300
+                    ${isCurrentNote ? 'scale-125 z-10' : 'scale-100'}
+                    ${isWaitingNote ? 'animate-bounce' : ''}
+                  `}
+                  style={{ minWidth: '50px' }}
+                >
+                  {/* Ledger lines */}
+                  {!isRest && ledgerLines.length > 0 && ledgerLines.map((lineY, lineIndex) => (
+                    <div
+                      key={lineIndex}
+                      className="absolute bg-white/70"
+                      style={{
+                        left: '15px',
+                        width: '25px',
+                        height: '1px',
+                        top: `${lineY}px`,
+                        zIndex: 1
+                      }}
+                    />
+                  ))}
+
+                  {/* Note container - single element approach for perfect alignment */}
+                  <div
+                    className="relative flex items-center justify-center"
+                    style={{
+                      position: 'absolute',
+                      top: `${staffPos.top + (accidental === 'b' ? -6 : accidental === '#' ? 0 : 0)}px`, // Different offsets for different accidentals
+                      left: '20px',
+                      transform: 'translateY(-50%)',
+                      zIndex: 3
+                    }}
+                  >
+                    {/* Combined accidental + note in single element for perfect alignment */}
+                    <span
+                      onClick={isWaitingNote ? onShowHint : undefined}
+                      className={`
+                        text-4xl font-bold transition-all duration-300 
+                        ${isWaitingNote ? 'cursor-pointer hover:scale-110' : ''}
+                        ${isCurrentNote
+                          ? isPracticeMode
+                            ? 'text-red-400 animate-pulse shadow-lg'
+                            : 'text-yellow-400 animate-pulse'
+                          : isPastNote
+                            ? 'text-green-400'
+                            : 'text-white'
+                        }
+                      `}
+                      style={{
+                        lineHeight: '1'
+                      }}
+                    >
+                      {/* Combine accidental and note symbol in one element */}
+                      <span className="text-2xl align-baseline">{accidentalSymbol}</span>{isRest ? getRestDuration(songData.durations[index]) : getNoteDuration(songData.durations[index])}
+                    </span>
+                  </div>
+
+                  {/* Note name label (below staff) */}
+                  <div
+                    className={`
+                      text-xs font-medium px-2 py-1 rounded transition-all duration-300 absolute
+                      ${isCurrentNote
+                        ? isPracticeMode
+                          ? 'bg-red-500 text-white animate-pulse'
+                          : 'bg-yellow-500 text-black'
+                        : isPastNote
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-700 text-white'
+                      }
+                    `}
+                    style={{
+                      top: '145px',
+                      transform: 'translateX(-50%)',
+                      left: '50%'
+                    }}
+                  >
+                    {getNoteDisplay(note)}
+                  </div>
+
+                  {/* Duration label (below note name) */}
+                  <div
+                    className="text-xs text-purple-300 absolute"
+                    style={{
+                      top: '125px',
+                      transform: 'translateX(-50%)',
+                      left: '50%'
+                    }}
+                  >
+                    {songData.durations[index]}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Keyboard Hint Modal */}
+      {showHint && isPracticeMode && songData && (
+        <KeyboardHint
+          targetNote={songData.notes[currentNoteIndex]}
+          onClose={onCloseHint}
+        />
+      )}
+
+      {/* Progress indicator */}
+      <div className="mt-2">
+        <div className="flex justify-between text-sm text-purple-300 mb-2">
+          <span>{isPracticeMode ? 'Practice Progress' : 'Playback Progress'}</span>
+          <div className="flex items-center gap-3">
+            <span>{currentNoteIndex} / {songData.notes.length}</span>
+            {autoScroll && (
+              <span className="text-xs bg-purple-600 px-2 py-1 rounded">Auto-scroll ON</span>
+            )}
+          </div>
+        </div>
+        <div className="w-full bg-gray-700 rounded-full h-2">
+          <div
+            className={`h-2 rounded-full transition-all duration-300 ${isPracticeMode
+              ? 'bg-gradient-to-r from-red-500 to-orange-500'
+              : 'bg-gradient-to-r from-purple-500 to-pink-500'
+              }`}
+            style={{ width: `${(currentNoteIndex / songData.notes.length) * 100}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
