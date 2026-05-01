@@ -415,3 +415,59 @@ function App() {
                 </div>
               </div>
             </div>
+            {/* Sample Songs */}
+            <div className="bg-gradient-to-r from-emerald-900/40 to-teal-900/40 rounded-xl p-3 flex-1 min-h-0">
+              <h3 className="text-sm font-semibold text-white mb-2 text-center">Sample Songs</h3>
+
+              <div className="space-y-1.5 max-h-full overflow-y-auto">
+                {Object.keys(sampleSongs).map(songName => (
+                  <button
+                    key={songName}
+                    onClick={() => handleSongSelect(songName)}
+                    className={`
+                      w-full p-2 rounded-lg font-medium transition-all duration-200 text-sm
+                      ${currentSong === songName
+                        ? 'bg-emerald-600 text-white shadow-lg'
+                        : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
+                      }
+                    `}
+                  >
+                    <span className="capitalize">{songName.replace(/([A-Z])/g, ' $1').trim()}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Keyboard Settings */}
+            <div className="mt-auto">
+              <KeyboardSettings
+                mapping={keyboardMapping}
+                onMappingChange={setKeyboardMapping}
+              />
+            </div>
+          </div>
+
+          {/* Mobile Controls (shown when toggled) */}
+          {showMobileControls && (
+            <div className="lg:hidden space-y-2 mb-2">
+              {/* Volume and Metronome Controls */}
+              <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg p-2">
+                <div className="grid grid-cols-2 gap-2">
+                  {/* Volume Control */}
+                  <div>
+                    <label className="block text-xs font-medium text-purple-300 mb-1">
+                      <div className="flex items-center gap-1">
+                        <Volume2 className="w-3 h-3" />
+                        Vol: {Math.round(volume * 100)}%
+                      </div>
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={volume}
+                      onChange={(e) => setVolume(parseFloat(e.target.value))}
+                      className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
+                    />
+                  </div>
