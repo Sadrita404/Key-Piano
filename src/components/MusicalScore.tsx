@@ -179,3 +179,130 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
         }
       }
     }
+    return {
+      top: topPosition,
+      needsLedger,
+      ledgerLines
+    };
+  };
+
+  // Function to get ledger lines based on note position
+  const getLedgerLines = (note: string, noteTop: number): number[] => {
+    if (note === 'rest') return [];
+
+    const { base, octave } = parseNoteSymbol(note);
+    const octaveNum = parseInt(octave);
+
+    // Staff line positions
+    const staffLines = [68, 56, 44, 32, 20]; // E4, G4, B4, D5, F5
+    const lineSpacing = 12;
+
+    const ledgerLines: number[] = [];
+
+    // Notes below the staff (C4 and lower)
+    if (noteTop > staffLines[0]) {
+      // Specific ledger line requirements for each note
+      if (octaveNum === 4) {
+        // C4 needs one ledger line below
+        if (base === 'C') {
+          ledgerLines.push(staffLines[0] + lineSpacing);
+        }
+      }
+      else if (octaveNum === 3) {
+        // B3 needs one ledger line below
+        if (base === 'B') {
+          ledgerLines.push(staffLines[0] + lineSpacing);
+        }
+        // A3 needs one ledger line below
+        else if (base === 'A') {
+          ledgerLines.push(staffLines[0] + lineSpacing);
+          ledgerLines.push(staffLines[0] + lineSpacing * 2);
+        }
+        // G3 needs two ledger lines below
+        else if (base === 'G') {
+          ledgerLines.push(staffLines[0] + lineSpacing);
+          ledgerLines.push(staffLines[0] + lineSpacing * 2);
+        }
+        // F3 needs three ledger lines below
+        else if (base === 'F') {
+          ledgerLines.push(staffLines[0] + lineSpacing);
+          ledgerLines.push(staffLines[0] + lineSpacing * 2);
+          ledgerLines.push(staffLines[0] + lineSpacing * 3);
+        }
+        // E3 needs three ledger lines below
+        else if (base === 'E') {
+          ledgerLines.push(staffLines[0] + lineSpacing);
+          ledgerLines.push(staffLines[0] + lineSpacing * 2);
+          ledgerLines.push(staffLines[0] + lineSpacing * 3);
+        }
+        // D3 needs three ledger lines below
+        else if (base === 'D') {
+          ledgerLines.push(staffLines[0] + lineSpacing);
+          ledgerLines.push(staffLines[0] + lineSpacing * 2);
+          ledgerLines.push(staffLines[0] + lineSpacing * 3);
+          ledgerLines.push(staffLines[0] + lineSpacing * 4);
+        }
+        // C3 needs three ledger lines below
+        else if (base === 'C') {
+          ledgerLines.push(staffLines[0] + lineSpacing);
+          ledgerLines.push(staffLines[0] + lineSpacing * 2);
+          ledgerLines.push(staffLines[0] + lineSpacing * 3);
+          ledgerLines.push(staffLines[0] + lineSpacing * 4);
+        }
+      }
+    }
+    // Notes above the staff (A5 and higher)
+    else if (noteTop < staffLines[4]) {
+      if (octaveNum === 5) {
+        // A5 needs one ledger line above
+        if (base === 'A') {
+          ledgerLines.push(staffLines[4] - lineSpacing);
+        }
+        // B5 needs one ledger line above
+        else if (base === 'B') {
+          ledgerLines.push(staffLines[4] - lineSpacing);
+        }
+      }
+      else if (octaveNum === 6) {
+        // C6 needs one ledger line above
+        if (base === 'C') {
+          ledgerLines.push(staffLines[4] - lineSpacing);
+        }
+        // D6 needs two ledger lines above
+        else if (base === 'D') {
+          ledgerLines.push(staffLines[4] - lineSpacing);
+          ledgerLines.push(staffLines[4] - lineSpacing * 2);
+        }
+        // E6 needs two ledger lines above
+        else if (base === 'E') {
+          ledgerLines.push(staffLines[4] - lineSpacing);
+          ledgerLines.push(staffLines[4] - lineSpacing * 2);
+        }
+        // F6 needs two ledger lines above
+        else if (base === 'F') {
+          ledgerLines.push(staffLines[4] - lineSpacing);
+          ledgerLines.push(staffLines[4] - lineSpacing * 2);
+        }
+        // G6 needs three ledger lines above
+        else if (base === 'G') {
+          ledgerLines.push(staffLines[4] - lineSpacing);
+          ledgerLines.push(staffLines[4] - lineSpacing * 2);
+          ledgerLines.push(staffLines[4] - lineSpacing * 3);
+        }
+        // A6 needs three ledger lines above
+        else if (base === 'A') {
+          ledgerLines.push(staffLines[4] - lineSpacing);
+          ledgerLines.push(staffLines[4] - lineSpacing * 2);
+          ledgerLines.push(staffLines[4] - lineSpacing * 3);
+        }
+        // B6 needs three ledger lines above
+        else if (base === 'B') {
+          ledgerLines.push(staffLines[4] - lineSpacing);
+          ledgerLines.push(staffLines[4] - lineSpacing * 2);
+          ledgerLines.push(staffLines[4] - lineSpacing * 3);
+        }
+      }
+    }
+
+    return ledgerLines;
+  };
