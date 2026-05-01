@@ -471,3 +471,62 @@ function App() {
                       className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
                     />
                   </div>
+
+                {/* Metronome Control */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-medium text-purple-300 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {metronomeBPM}
+                      </label>
+                      <button
+                        onClick={() => setIsMetronomeOn(!isMetronomeOn)}
+                        className={`
+                          px-2 py-0.5 rounded text-xs font-medium transition-all duration-200
+                          ${isMetronomeOn
+                            ? 'bg-green-600 hover:bg-green-700 text-white'
+                            : 'bg-slate-600 hover:bg-slate-500 text-slate-200'
+                          }
+                        `}
+                      >
+                        {isMetronomeOn ? 'ON' : 'OFF'}
+                      </button>
+                    </div>
+                    <input
+                      type="range"
+                      min="40"
+                      max="240"
+                      step="5"
+                      value={metronomeBPM}
+                      onChange={(e) => setMetronomeBPM(parseInt(e.target.value))}
+                      className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
+                      disabled={!isMetronomeOn}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Songs Section for Mobile */}
+              <div className="bg-gradient-to-r from-emerald-900/40 to-teal-900/40 rounded-lg p-2">
+                <h3 className="text-sm font-semibold text-white mb-2 text-center">Sample Songs</h3>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {Object.keys(sampleSongs).map(songName => (
+                    <button
+                      key={songName}
+                      onClick={() => handleSongSelect(songName)}
+                      className={`
+                        p-2 rounded-lg font-medium transition-all duration-200 text-xs
+                        ${currentSong === songName
+                          ? 'bg-emerald-600 text-white shadow-lg'
+                          : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
+                        }
+                      `}
+                    >
+                      <span className="capitalize">{songName.replace(/([A-Z])/g, ' $1').trim()}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          
