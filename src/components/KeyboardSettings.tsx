@@ -45,3 +45,29 @@ export const KeyboardSettings: React.FC<KeyboardSettingsProps> = ({
 
   const resetToDefault = () => {
     const defaultMapping: KeyboardMapping = {};
+
+    // QWERTY row - Octave 3-4
+    defaultRows[0].keys.forEach((key, index) => {
+      const octave = index === 7 ? 4 : 3;
+      defaultMapping[key] = { note: notes[index], octave };
+    });
+
+    // ASDF row - Octave 4-5
+    defaultRows[1].keys.forEach((key, index) => {
+      const octave = index === 7 ? 5 : 4;
+      defaultMapping[key] = { note: notes[index], octave };
+    });
+
+    // ZXCV row - Octave 5-6
+    defaultRows[2].keys.forEach((key, index) => {
+      const octave = index === 7 ? 6 : 5;
+      defaultMapping[key] = { note: notes[index], octave };
+    });
+
+    setTempMapping(defaultMapping);
+  };
+
+  const getCurrentRowOctave = (rowIndex: number): number => {
+    const firstKey = defaultRows[rowIndex].keys[0];
+    return tempMapping[firstKey]?.octave || 3 + rowIndex;
+  };
