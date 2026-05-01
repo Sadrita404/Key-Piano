@@ -54,4 +54,4 @@ export const Controls: React.FC<ControlsProps> = ({ octave, setOctave, volume, s
       </div>
     </div>
   );
-};
+}
