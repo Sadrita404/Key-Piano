@@ -1,125 +1,178 @@
-import React, { useMemo, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { normalizeNote } from '../utils/musicUtils';
+// src/components/KeyboardSettings.tsx
 
-interface KeyboardHintProps {
-  targetNote: string;
-  onClose: () => void;
+import React, { useState } from 'react';
+import { Settings, Save, RotateCcw } from 'lucide-react';
+
+interface KeyboardMapping {
+  [key: string]: { note: string; octave: number };
 }
 
-const pianoKeyLayout = [
-  // White Keys
-  { note: 'C', computerKey: 'a', type: 'white' },
-  { note: 'D', computerKey: 's', type: 'white' },
-  { note: 'E', computerKey: 'd', type: 'white' },
-  { note: 'F', computerKey: 'f', type: 'white' },
-  { note: 'G', computerKey: 'g', type: 'white' },
-  { note: 'A', computerKey: 'h', type: 'white' },
-  { note: 'B', computerKey: 'j', type: 'white' },
-  // Black Keys (with corresponding flat notes)
-  { note: 'C#', flatNote: 'Db', computerKey: 'w', type: 'black', position: 0.7 },
-  { note: 'D#', flatNote: 'Eb', computerKey: 'e', type: 'black', position: 1.7 },
-  { note: 'F#', flatNote: 'Gb', computerKey: 't', type: 'black', position: 3.7 },
-  { note: 'G#', flatNote: 'Ab', computerKey: 'y', type: 'black', position: 4.7 },
-  { note: 'A#', flatNote: 'Bb', computerKey: 'u', type: 'black', position: 5.7 },
+interface KeyboardSettingsProps {
+  mapping: KeyboardMapping;
+  onMappingChange: (mapping: KeyboardMapping) => void;
+}
+
+const defaultRows = [
+  { keys: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i'], label: 'QWERTY Row' },
+  { keys: ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k'], label: 'ASDF Row' },
+  { keys: ['z', 'x', 'c', 'v', 'b', 'n', 'm', ','], label: 'ZXCV Row' }
 ];
 
-export const KeyboardHint: React.FC<KeyboardHintProps> = ({
-  targetNote,
-  onClose
+const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C'];
+const solfege = ['do', 're', 'mi', 'fa', 'so', 'la', 'ti', 'do'];
+
+export const KeyboardSettings: React.FC<KeyboardSettingsProps> = ({
+  mapping,
+  onMappingChange
 }) => {
-  // Memoize all derived note properties at once to avoid re-calculation and ensure consistency.
-  const noteInfo = useMemo(() => {
-    if (!targetNote || targetNote === 'rest') {
-      return { searchNoteName: null, targetOctave: 4, displayNote: targetNote };
-    }
+  const [isOpen, setIsOpen] = useState(false);
+  const [tempMapping, setTempMapping] = useState<KeyboardMapping>(mapping);
 
-    const normalized = normalizeNote(targetNote);
-    const match = normalized.match(/^([A-G]#?)(\d+)$/);
+  const updateRowOctave = (rowIndex: number, octave: number) => {
+    const newMapping = { ...tempMapping };
+    const row = defaultRows[rowIndex];
 
-    if (!match) {
-      return { searchNoteName: null, targetOctave: 4, displayNote: targetNote };
-    }
+    row.keys.forEach((key, noteIndex) => {
+      const finalOctave = noteIndex === 7 ? octave + 1 : octave; // Last note is next octave
+      newMapping[key] = { note: notes[noteIndex], octave: finalOctave };
+    });
 
-    // The normalized note name (e.g., "A#") is our search key
-    const searchName = match[1];
-    const octave = parseInt(match[2], 10);
+    setTempMapping(newMapping);
+  };
 
-    // Display the original note ("Bb4") for user clarity
-    return { searchNoteName: searchName, targetOctave: octave, displayNote: targetNote };
-  }, [targetNote]);
+  const saveMapping = () => {
+    onMappingChange(tempMapping);
+    setIsOpen(false);
+  };
 
-  const { searchNoteName, targetOctave, displayNote } = noteInfo;
+  const resetToDefault = () => {
+    const defaultMapping: KeyboardMapping = {};
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+    // QWERTY row - Octave 3-4
+    defaultRows[0].keys.forEach((key, index) => {
+      const octave = index === 7 ? 4 : 3;
+      defaultMapping[key] = { note: notes[index], octave };
+    });
+
+    // ASDF row - Octave 4-5
+    defaultRows[1].keys.forEach((key, index) => {
+      const octave = index === 7 ? 5 : 4;
+      defaultMapping[key] = { note: notes[index], octave };
+    });
+
+    // ZXCV row - Octave 5-6
+    defaultRows[2].keys.forEach((key, index) => {
+      const octave = index === 7 ? 6 : 5;
+      defaultMapping[key] = { note: notes[index], octave };
+    });
+
+    setTempMapping(defaultMapping);
+  };
+
+  const getCurrentRowOctave = (rowIndex: number): number => {
+    const firstKey = defaultRows[rowIndex].keys[0];
+    return tempMapping[firstKey]?.octave || 3 + rowIndex;
+  };
+
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+      >
+        <Settings className="w-4 h-4" />
+        Keyboard Settings
+      </button>
+    );
+  }
 
   return (
-    <div
-      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fade-in"
-      onClick={onClose}
-    >
-      <div
-        className="bg-slate-800 rounded-xl p-6 max-w-lg w-full border border-purple-800 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold text-white">
-            Play Note: <span className="text-yellow-400">{displayNote}</span>
-          </h3>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-800 rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-white">Keyboard Mapping Settings</h3>
           <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            onClick={() => setIsOpen(false)}
+            className="text-gray-400 hover:text-white text-2xl"
           >
-            <X className="w-6 h-6" />
+            ×
           </button>
         </div>
 
-        <div className="mb-6">
-          <p className="text-purple-200 mb-4 text-center">
-            Press the highlighted key on your computer keyboard.
-          </p>
+        <div className="space-y-6">
+          {defaultRows.map((row, rowIndex) => {
+            const currentOctave = getCurrentRowOctave(rowIndex);
 
-          <div className="relative h-40">
-            <div className="flex justify-center h-full">
-              {pianoKeyLayout.filter(k => k.type === 'white').map(key => {
-                const isHighlighted = searchNoteName === key.note;
-                return (
-                  <div key={key.computerKey} className={`w-12 h-full border-2 border-slate-500 rounded-b-lg flex flex-col justify-end items-center p-2 transition-all ${isHighlighted ? 'bg-yellow-400 text-black animate-pulse scale-105 shadow-lg shadow-yellow-400/50' : 'bg-white text-slate-600'}`}>
-                    <span className="text-2xl font-bold">{key.computerKey.toUpperCase()}</span>
-                    <span className="text-xs">{key.note}{targetOctave}</span>
-                  </div>
-                );
-              })}
-            </div>
-            {pianoKeyLayout.filter(k => k.type === 'black').map(key => {
-              const isHighlighted = searchNoteName === key.note;
-              return (
-                <div key={key.computerKey} className={`absolute top-0 w-8 h-24 border-2 border-slate-900 rounded-b-lg flex flex-col justify-end items-center p-1 z-10 transition-all text-center leading-tight ${isHighlighted ? 'bg-yellow-400 text-black animate-pulse scale-105 shadow-lg shadow-yellow-400/50' : 'bg-black text-white'}`} style={{ left: `calc(50% - (3.5 * 3rem) + (${key.position!} * 3rem))` }}>
-                  <span className="text-xl font-bold mb-1">{key.computerKey.toUpperCase()}</span>
-                  <div className="text-[10px] font-medium">
-                    <div>{key.note}{targetOctave}</div>
-                    <div>{key.flatNote}{targetOctave}</div>
+            return (
+              <div key={rowIndex} className="bg-slate-700 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-medium text-white">{row.label}</h4>
+                  <div className="flex items-center gap-2">
+                    <label className="text-purple-300 text-sm">Base Octave:</label>
+                    <select
+                      value={currentOctave}
+                      onChange={(e) => updateRowOctave(rowIndex, parseInt(e.target.value))}
+                      className="bg-slate-600 text-white rounded px-2 py-1 text-sm"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7].map(oct => (
+                        <option key={oct} value={oct}>{oct}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+
+                <div className="grid grid-cols-8 gap-2">
+                  {row.keys.map((key, noteIndex) => {
+                    const displayOctave = noteIndex === 7 ? currentOctave + 1 : currentOctave;
+
+                    return (
+                      <div key={key} className="text-center">
+                        <div className="bg-white text-gray-800 w-10 h-10 rounded flex items-center justify-center font-bold text-sm mb-1">
+                          {key.toUpperCase()}
+                        </div>
+                        <div className="text-xs text-purple-200">
+                          <div className="font-medium">{notes[noteIndex]}{displayOctave}</div>
+                          <div className="text-purple-300 italic">{solfege[noteIndex]}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        <button
-          onClick={onClose}
-          className="w-full mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-semibold"
-        >
-          Got it!
-        </button>
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={saveMapping}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+          >
+            <Save className="w-4 h-4" />
+            Save Settings
+          </button>
+
+          <button
+            onClick={resetToDefault}
+            className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Reset to Default
+          </button>
+
+          <button
+            onClick={() => setIsOpen(false)}
+            className="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+
+        <div className="mt-4 text-sm text-purple-300">
+          <p>• Each row can be set to a different base octave</p>
+          <p>• The last key in each row (I, K, comma) plays the next octave's "do"</p>
+          <p>• Hold Shift for sharps (#) or Alt/Option for flats (♭)</p>
+        </div>
       </div>
     </div>
   );
