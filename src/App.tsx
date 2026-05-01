@@ -27,8 +27,7 @@ function App() {
   const [showMobileControls, setShowMobileControls] = useState(false);
 
   const [keyboardMapping, setKeyboardMapping] = useState<KeyboardMapping>(() => {
-
-     // Initialize with default mapping
+    // Initialize with default mapping
     const mapping: KeyboardMapping = {};
     Object.entries(defaultNoteMapping).forEach(([key, note]) => {
       const qwertyKeys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i'];
@@ -84,7 +83,6 @@ function App() {
     });
   }, []);
 
-
   // Automatically skip 'rest' notes in practice mode
   useEffect(() => {
     // We only run this logic in practice mode with a valid song
@@ -111,6 +109,7 @@ function App() {
   const playNote = useCallback((rawNote: string, duration?: number) => {
     if (!audioEngineRef.current) return;
     const note = normalizeNote(rawNote);
+
     // If the duration is provided, it's a song note from autoplay.
     if (duration) {
       if (!isMuted) {
@@ -190,7 +189,8 @@ function App() {
       } else {
         noteToPlay = `${mapping.note}${mapping.octave}`;
       }
-       // Play the note and store the mapping
+
+      // Play the note and store the mapping
       playNote(noteToPlay);
       activeKeyToNoteMap.current.set(key, noteToPlay);
     }
@@ -377,7 +377,7 @@ function App() {
                   />
                 </div>
 
-                 {/* Metronome Control */}
+                {/* Metronome Control */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs font-medium text-purple-300 flex items-center gap-1">
@@ -415,6 +415,7 @@ function App() {
                 </div>
               </div>
             </div>
+
             {/* Sample Songs */}
             <div className="bg-gradient-to-r from-emerald-900/40 to-teal-900/40 rounded-xl p-3 flex-1 min-h-0">
               <h3 className="text-sm font-semibold text-white mb-2 text-center">Sample Songs</h3>
@@ -472,7 +473,7 @@ function App() {
                     />
                   </div>
 
-                {/* Metronome Control */}
+                  {/* Metronome Control */}
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <label className="text-xs font-medium text-purple-300 flex items-center gap-1">
