@@ -23,3 +23,24 @@ const pianoKeyLayout = [
   { note: 'G#', flatNote: 'Ab', computerKey: 'y', type: 'black', position: 4.7 },
   { note: 'A#', flatNote: 'Bb', computerKey: 'u', type: 'black', position: 5.7 },
 ];
+
+export const KeyboardHint: React.FC<KeyboardHintProps> = ({
+  targetNote,
+  onClose
+}) => {
+  // Memoize all derived note properties at once to avoid re-calculation and ensure consistency.
+  const noteInfo = useMemo(() => {
+    if (!targetNote || targetNote === 'rest') {
+      return { searchNoteName: null, targetOctave: 4, displayNote: targetNote };
+    }
+
+    const normalized = normalizeNote(targetNote);
+    const match = normalized.match(/^([A-G]#?)(\d+)$/);
+
+    if (!match) {
+      return { searchNoteName: null, targetOctave: 4, displayNote: targetNote };
+    }
+
+    // The normalized note name (e.g., "A#") is our search key
+    const searchName = match[1];
+    const octave = parseInt(match[2], 10);
