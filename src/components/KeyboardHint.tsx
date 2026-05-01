@@ -1,3 +1,5 @@
+// src/components/KeyboardHint.tsx
+
 import React, { useMemo, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { normalizeNote } from '../utils/musicUtils';
@@ -44,3 +46,45 @@ export const KeyboardHint: React.FC<KeyboardHintProps> = ({
     // The normalized note name (e.g., "A#") is our search key
     const searchName = match[1];
     const octave = parseInt(match[2], 10);
+
+    // Display the original note ("Bb4") for user clarity
+    return { searchNoteName: searchName, targetOctave: octave, displayNote: targetNote };
+  }, [targetNote]);
+
+  const { searchNoteName, targetOctave, displayNote } = noteInfo;
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="bg-slate-800 rounded-xl p-6 max-w-lg w-full border border-purple-800 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-semibold text-white">
+            Play Note: <span className="text-yellow-400">{displayNote}</span>
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="mb-6">
+          <p className="text-purple-200 mb-4 text-center">
+            Press the highlighted key on your computer keyboard.
+          </p>
