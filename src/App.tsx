@@ -56,3 +56,30 @@ function App() {
     audioEngineRef.current = new AudioEngine();
     return () => { audioEngineRef.current?.dispose(); };
   }, []);
+
+  // Metronome effect
+  useEffect(() => {
+    if (!audioEngineRef.current) return;
+
+    if (isMetronomeOn) {
+      audioEngineRef.current.startMetronome(metronomeBPM);
+    } else {
+      audioEngineRef.current.stopMetronome();
+    }
+
+    return () => {
+      audioEngineRef.current?.stopMetronome();
+    };
+  }, [isMetronomeOn, metronomeBPM]);
+
+  const stopNote = useCallback((rawNote: string) => {
+    if (!audioEngineRef.current) return;
+    const note = normalizeNote(rawNote);
+
+    audioEngineRef.current.stopNote(note);
+    setActiveNotes(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(note);
+      return newSet;
+    });
+  }, []);
