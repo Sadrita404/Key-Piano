@@ -529,4 +529,54 @@ function App() {
               </div>
             </div>
           )}
-          
+
+          {/* Musical Score - Responsive Column */}
+          <div className="lg:col-span-2 flex-1 min-h-0">
+            <MusicalScore
+              currentSong={currentSong}
+              isPlaying={isPlaying}
+              isMuted={isMuted}
+              isPracticeMode={isPracticeMode}
+              currentNoteIndex={currentNoteIndex}
+              onTogglePlay={handleTogglePlay}
+              onToggleMute={handleToggleMute}
+              onShowHint={() => setShowHint(true)}
+              songData={currentSong ? {
+                ...sampleSongs[currentSong],
+                title: currentSong.replace(/([A-Z])/g, ' $1').trim()
+              } : undefined}
+              keyboardMapping={keyboardMapping}
+              showHint={showHint}
+              onCloseHint={() => setShowHint(false)}
+            />
+          </div>
+        </div>
+
+        {/* Piano Component - Always at bottom */}
+        <div className="mt-2">
+          <Piano
+            activeNotes={activeNotes}
+            onNotePlay={playNote}
+            onNoteStop={stopNote}
+          />
+        </div>
+
+        {/* Keyboard Settings for Mobile */}
+        <div className="lg:hidden mt-2">
+          <KeyboardSettings
+            mapping={keyboardMapping}
+            onMappingChange={setKeyboardMapping}
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-2 text-purple-300 text-xs">
+          <p className="hidden sm:block">Use your keyboard to play notes • Hold Shift for sharps • Hold Alt/Option for flats | Develop By Sadrita Neogi</p>
+          <p className="sm:hidden">Tap piano keys to play • Use keyboard for desktop</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
