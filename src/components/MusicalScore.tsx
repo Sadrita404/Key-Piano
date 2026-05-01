@@ -68,3 +68,47 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
       </div>
     );
   }
+
+  const parseNoteSymbol = (note: string) => {
+    if (note === 'rest') return { base: 'Rest', accidental: '', octave: '' };
+    const match = note.match(/^([A-G])([#b]?)(\d+)$/);
+    if (match) {
+      const [, base, accidental, octave] = match;
+      return { base, accidental, octave };
+    }
+    // fallback for non-standard notes
+    return { base: note.replace(/\d+/, ""), accidental: "", octave: "" };
+  };
+
+  const getNoteDisplay = (note: string) => {
+    const { base, accidental, octave } = parseNoteSymbol(note);
+    if (base === 'Rest') return 'Rest';
+
+    const accidentalSymbol = accidental === '#' ? '♯' : accidental === 'b' ? '♭' : '';
+    return (
+      <>
+        <span>{base}{accidentalSymbol}</span>
+        <sub className="opacity-60">{octave}</sub>
+      </>
+    );
+  };
+
+  const getNoteDuration = (duration: number) => {
+    if (duration >= 2) return '𝅝'; // Whole note
+    if (duration >= 1) return '𝅗𝅥'; // Half note
+    if (duration >= 0.5) return '𝅘𝅥'; // Quarter note
+    if (duration >= 0.25) return '𝅘𝅥𝅮'; // Eighth note
+    if (duration >= 0.125) return '𝅘𝅥𝅯'; // Sixteenth note
+    if (duration >= 0.0625) return '𝅘𝅥𝅰'; // Thirty-second note
+    return '𝅘𝅥𝅱'; // Sixty-fourth note or shorter
+  };
+
+  const getRestDuration = (duration: number) => {
+    if (duration >= 2) return '𝄻'; // Whole rest
+    if (duration >= 1) return '𝄼'; // Half rest
+    if (duration >= 0.5) return '𝄽'; // Quarter rest
+    if (duration >= 0.25) return '𝄾'; // Eighth rest
+    if (duration >= 0.125) return '𝄿'; // Sixteenth rest
+    if (duration >= 0.0625) return '𝅀'; // Thirty-second rest
+    return '𝅁'; // Sixty-fourth rest or shorter
+  };
