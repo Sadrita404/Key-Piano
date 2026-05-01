@@ -151,3 +151,43 @@ function App() {
         return; // Handled, so we exit
       }
     }
+
+    // Default handling for FREE PLAY or an INCORRECT NOTE in practice mode
+    audioEngineRef.current.playNote(note, volume);
+
+    setActiveNotes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(note)) {
+        newSet.delete(note);
+        return newSet;
+      }
+      return prev;
+    });
+
+    setTimeout(() => {
+      setActiveNotes(prev => new Set(prev).add(note));
+    }, 0);
+
+  }, [volume, isMuted, isPracticeMode, currentSong, currentNoteIndex, metronomeBPM, stopNote]);
+
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    const key = event.key.toLowerCase();
+    if (pressedKeys.current.has(key) || event.repeat) return;
+
+    const mapping = keyboardMapping[key];
+    if (mapping) {
+      // Prevent browser shortcuts (e.g., Alt+F opening a menu)
+      event.preventDefault();
+      pressedKeys.current.add(key);
+
+      let noteToPlay: string;
+
+      // Determine the note based on modifiers (Shift > Alt > Natural)
+      if (event.shiftKey && !['E', 'B'].includes(mapping.note)) {
+        noteToPlay = `${mapping.note}#${mapping.octave}`;
+      } else if (event.altKey && !['C', 'F'].includes(mapping.note)) {
+        noteToPlay = `${mapping.note}b${mapping.octave}`;
+      } else {
+        noteToPlay = `${mapping.note}${mapping.octave}`;
+      }
+      
