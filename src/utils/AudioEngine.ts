@@ -1,4 +1,4 @@
-/ src/utils/AudioEngine.ts
+// src/utils/AudioEngine.ts
 
 export class AudioEngine {
   private audioContext: AudioContext;
@@ -70,8 +70,8 @@ export class AudioEngine {
     const octave = parseInt(octaveStr);
     const baseFreq = noteFrequencies[noteName] || 440;
 
-
-     const octaveMultiplier = Math.pow(2, octave - 4);
+    // Adjust for octave (C4 is the base octave)
+    const octaveMultiplier = Math.pow(2, octave - 4);
 
     return baseFreq * octaveMultiplier;
   }
@@ -98,6 +98,7 @@ export class AudioEngine {
     const oscillator = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
 
+    // Different frequencies for downbeat vs regular beat
     oscillator.type = 'sine';
     oscillator.frequency.setValueAtTime(
       isDownbeat ? 1200 : 800,
@@ -152,7 +153,7 @@ export class AudioEngine {
       this.audioContext.resume();
     }
 
-     // Stop existing note if playing
+    // Stop existing note if playing
     this.stopNote(note);
 
     const frequency = this.getFrequency(note);
@@ -186,7 +187,8 @@ export class AudioEngine {
 
     oscillator.connect(gainNode);
 
-     if (useReverb && this.reverbNode) {
+    // Route through reverb or direct to master
+    if (useReverb && this.reverbNode) {
       const dryGain = this.audioContext.createGain();
       const wetGain = this.audioContext.createGain();
 
@@ -217,7 +219,7 @@ export class AudioEngine {
     const gainNode = this.gainNodes.get(note);
 
     if (oscillator && gainNode) {
-        // Natural release
+      // Natural release
       gainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.3);
       oscillator.stop(this.audioContext.currentTime + 0.3);
@@ -227,6 +229,7 @@ export class AudioEngine {
     }
   }
 
+  // Additional methods for piano app functionality
   setMasterVolume(volume: number): void {
     this.masterGainNode.gain.setValueAtTime(
       Math.max(0, Math.min(1, volume)),
