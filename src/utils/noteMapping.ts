@@ -21,3 +21,13 @@ export const noteMapping: { [key: string]: string } = {
   'j': 'B',
   'k': 'C',
   
+  // Third row (ZXCVBNM) - Next octave (do re mi fa so la ti do)
+  'z': 'C',
+  'x': 'D',
+  'c': 'E',
+  'v': 'F',
+  'b': 'G',
+  'n': 'A',
+  'm': 'B',
+  ',': 'C'
+};
