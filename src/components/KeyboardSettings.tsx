@@ -71,3 +71,51 @@ export const KeyboardSettings: React.FC<KeyboardSettingsProps> = ({
     const firstKey = defaultRows[rowIndex].keys[0];
     return tempMapping[firstKey]?.octave || 3 + rowIndex;
   };
+
+
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+      >
+        <Settings className="w-4 h-4" />
+        Keyboard Settings
+      </button>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-800 rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-white">Keyboard Mapping Settings</h3>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="text-gray-400 hover:text-white text-2xl"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {defaultRows.map((row, rowIndex) => {
+            const currentOctave = getCurrentRowOctave(rowIndex);
+
+            return (
+              <div key={rowIndex} className="bg-slate-700 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-medium text-white">{row.label}</h4>
+                  <div className="flex items-center gap-2">
+                    <label className="text-purple-300 text-sm">Base Octave:</label>
+                    <select
+                      value={currentOctave}
+                      onChange={(e) => updateRowOctave(rowIndex, parseInt(e.target.value))}
+                      className="bg-slate-600 text-white rounded px-2 py-1 text-sm"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7].map(oct => (
+                        <option key={oct} value={oct}>{oct}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
