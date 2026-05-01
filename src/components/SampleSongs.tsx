@@ -40,3 +40,10 @@ export const SampleSongs: React.FC<SampleSongsProps> = ({
           </button>
         ))}
       </div>
+
+      <div className="mt-4 text-center text-emerald-200 text-sm">
+        Select a song to see its musical score, then use Play/Practice mode
+      </div>
+    </div>
+  );
+};
