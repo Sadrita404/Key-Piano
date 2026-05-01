@@ -423,3 +423,5 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
               const accidentalSymbol = accidental === "#" ? "♯" : accidental === "b" ? "♭" : "";
 
               const staffPos = getStaffPosition(note);
+
+              
