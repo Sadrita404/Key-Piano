@@ -376,3 +376,42 @@ function App() {
                     className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
                   />
                 </div>
+
+                 {/* Metronome Control */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-medium text-purple-300 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {metronomeBPM} BPM
+                    </label>
+                    <button
+                      onClick={() => setIsMetronomeOn(!isMetronomeOn)}
+                      className={`
+                        px-2 py-0.5 rounded text-xs font-medium transition-all duration-200
+                        ${isMetronomeOn
+                          ? 'bg-green-600 hover:bg-green-700 text-white'
+                          : 'bg-slate-600 hover:bg-slate-500 text-slate-200'
+                        }
+                      `}
+                    >
+                      {isMetronomeOn ? 'ON' : 'OFF'}
+                    </button>
+                  </div>
+                  <input
+                    type="range"
+                    min="40"
+                    max="240"
+                    step="5"
+                    value={metronomeBPM}
+                    onChange={(e) => setMetronomeBPM(parseInt(e.target.value))}
+                    className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
+                    disabled={!isMetronomeOn}
+                  />
+                  {isMetronomeOn && (
+                    <div className="text-xs text-green-400 mt-0.5">
+                      {isPlaying ? "• Synced to song" : "• Ready"}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
