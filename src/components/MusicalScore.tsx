@@ -142,3 +142,40 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
       'A#': -5, 'Bb': -5,
       'B': -6
     };
+     const octaveNum = parseInt(octave);
+    const octaveOffset = (4 - octaveNum) * 7; // Each octave has 7 staff positions
+
+    // Calculate the note's vertical position
+    const noteOffset = notePositions[base + (accidental || '')] || 0;
+    const totalOffset = octaveOffset + noteOffset;
+    const topPosition = middleCPosition + (totalOffset * (lineSpacing / 2));
+
+    // Determine if ledger lines are needed and which ones
+    const ledgerLines: number[] = [];
+    let needsLedger = false;
+
+    // Staff line positions (for reference)
+    const staffLinePositions = [68, 56, 44, 32, 20]; // E4, G4, B4, D5, F5
+
+    // Check if note is outside the staff
+    if (topPosition > staffLinePositions[0] + lineSpacing / 2 ||
+      topPosition < staffLinePositions[4] - lineSpacing / 2) {
+      needsLedger = true;
+
+      // Calculate ledger line positions
+      if (topPosition > staffLinePositions[0]) {
+        // Below the staff - add ledger lines
+        let currentLedgerPos = staffLinePositions[0] + lineSpacing;
+        while (currentLedgerPos <= topPosition + lineSpacing / 2) {
+          ledgerLines.push(currentLedgerPos);
+          currentLedgerPos += lineSpacing;
+        }
+      } else {
+        // Above the staff - add ledger lines
+        let currentLedgerPos = staffLinePositions[4] - lineSpacing;
+        while (currentLedgerPos >= topPosition - lineSpacing / 2) {
+          ledgerLines.push(currentLedgerPos);
+          currentLedgerPos -= lineSpacing;
+        }
+      }
+    }
