@@ -190,4 +190,54 @@ function App() {
       } else {
         noteToPlay = `${mapping.note}${mapping.octave}`;
       }
+       // Play the note and store the mapping
+      playNote(noteToPlay);
+      activeKeyToNoteMap.current.set(key, noteToPlay);
+    }
+  }, [octave, playNote, keyboardMapping]);
+
+  const handleKeyUp = useCallback((event: KeyboardEvent) => {
+    const key = event.key.toLowerCase();
+    pressedKeys.current.delete(key);
+
+    // Look up which note was actually played by this key
+    const noteToStop = activeKeyToNoteMap.current.get(key);
+
+    if (noteToStop) {
+      stopNote(noteToStop);
+      // Clean up the mapping
+      activeKeyToNoteMap.current.delete(key);
+    }
+  }, [stopNote]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [handleKeyDown, handleKeyUp]);
+
+  const playSong = useCallback((song: { notes: string[]; durations: number[] }) => {
+    setIsPlaying(true);
+    setCurrentNoteIndex(0);
+
+    // Use metronome BPM for song tempo (quarter note = 1 beat)
+    const beatDurationMs = (60 / metronomeBPM) * 1000; 
+
+    let noteIndex = 0;
+
+    const playNextNote = () => {
+      if (noteIndex >= song.notes.length) {
+        setCurrentSong('');
+        setIsPlaying(false);
+        setCurrentNoteIndex(0);
+        return;
+      }
+
+      setCurrentNoteIndex(noteIndex);
+      const note = song.notes[noteIndex];
+      const duration = song.durations[noteIndex] * beatDurationMs;
       
