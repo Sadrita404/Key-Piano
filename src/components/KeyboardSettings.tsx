@@ -1,3 +1,5 @@
+// src/components/KeyboardSettings.tsx
+
 import React, { useState } from 'react';
 import { Settings, Save, RotateCcw } from 'lucide-react';
 
@@ -72,7 +74,6 @@ export const KeyboardSettings: React.FC<KeyboardSettingsProps> = ({
     return tempMapping[firstKey]?.octave || 3 + rowIndex;
   };
 
-
   if (!isOpen) {
     return (
       <button
@@ -120,7 +121,7 @@ export const KeyboardSettings: React.FC<KeyboardSettingsProps> = ({
                   </div>
                 </div>
 
-                 <div className="grid grid-cols-8 gap-2">
+                <div className="grid grid-cols-8 gap-2">
                   {row.keys.map((key, noteIndex) => {
                     const displayOctave = noteIndex === 7 ? currentOctave + 1 : currentOctave;
 
