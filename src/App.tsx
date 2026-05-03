@@ -284,7 +284,7 @@ function App() {
             <div className={`${retroCardBase} rounded-none p-3`}>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 mb-1">VOLUME_OUT</label>
+                  <label className="block text-[10px] font-black text-slate-500 mb-1">VOLUME </label>
                   <input
                     type="range" min="0" max="1" step="0.1" value={volume}
                     onChange={(e) => setVolume(parseFloat(e.target.value))}
@@ -294,7 +294,7 @@ function App() {
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-[10px] font-black text-slate-500">TEMPO_BPM</label>
+                    <label className="text-[10px] font-black text-slate-500">TEMPO BPM</label>
                     <button
                       onClick={() => setIsMetronomeOn(!isMetronomeOn)}
                       className={`${retroBtnBase} px-2 py-0.5 text-[10px] rounded-none ${isMetronomeOn ? 'bg-green-400 text-slate-900' : 'bg-slate-200'}`}
