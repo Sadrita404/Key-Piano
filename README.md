@@ -21,6 +21,9 @@
   | CSS |
   |HTML|
   
+---
+
+Ai  - I have use ai to know how I can implement the octaves for the music.
 
 ---
 
