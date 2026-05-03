@@ -63,7 +63,7 @@ export const MusicalScore: React.FC<MusicalScoreProps> = ({
     return (
       <div className="bg-slate-900 border-2 border-slate-800 rounded-none p-6 h-full flex items-center justify-center">
         <div className="text-center">
-          <h3 className="text-xl font-black text-white mb-3 uppercase italic tracking-widest">NO_SIGNAL</h3>
+          <h3 className="text-xl font-black text-white mb-3 uppercase italic tracking-widest">SONG NOT SELECTED</h3>
           <p className="text-slate-500 font-bold text-xs uppercase">Select a track to initialize score</p>
         </div>
       </div>
