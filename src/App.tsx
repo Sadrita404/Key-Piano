@@ -27,7 +27,6 @@ function App() {
   const [showMobileControls, setShowMobileControls] = useState(false);
 
   const [keyboardMapping, setKeyboardMapping] = useState<KeyboardMapping>(() => {
-    // Initialize with default mapping
     const mapping: KeyboardMapping = {};
     Object.entries(defaultNoteMapping).forEach(([key, note]) => {
       const qwertyKeys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i'];
@@ -38,7 +37,6 @@ function App() {
       if (asdfKeys.includes(key)) baseOctave = 4;
       if (zxcvKeys.includes(key)) baseOctave = 5;
 
-      // Handle octave completion notes
       const isOctaveCompletion = ['i', 'k', ','].includes(key);
       const finalOctave = isOctaveCompletion ? baseOctave + 1 : baseOctave;
       mapping[key] = { note, octave: finalOctave };
@@ -56,16 +54,13 @@ function App() {
     return () => { audioEngineRef.current?.dispose(); };
   }, []);
 
-  // Metronome effect
   useEffect(() => {
     if (!audioEngineRef.current) return;
-
     if (isMetronomeOn) {
       audioEngineRef.current.startMetronome(metronomeBPM);
     } else {
       audioEngineRef.current.stopMetronome();
     }
-
     return () => {
       audioEngineRef.current?.stopMetronome();
     };
@@ -74,7 +69,6 @@ function App() {
   const stopNote = useCallback((rawNote: string) => {
     if (!audioEngineRef.current) return;
     const note = normalizeNote(rawNote);
-
     audioEngineRef.current.stopNote(note);
     setActiveNotes(prev => {
       const newSet = new Set(prev);
@@ -83,14 +77,11 @@ function App() {
     });
   }, []);
 
-  // Automatically skip 'rest' notes in practice mode
   useEffect(() => {
     if (isPracticeMode && currentSong && sampleSongs[currentSong]) {
       const song = sampleSongs[currentSong];
-
       if (currentNoteIndex < song.notes.length) {
         const currentNote = song.notes[currentNoteIndex];
-
         if (currentNote === 'rest') {
           const beatDuration = song.durations[currentNoteIndex];
           const restDurationMs = beatDuration * (60 / metronomeBPM) * 1000;
@@ -118,23 +109,16 @@ function App() {
     if (isPracticeMode && currentSong && sampleSongs[currentSong]) {
       const song = sampleSongs[currentSong];
       if (song.notes[currentNoteIndex] === 'rest') return;
-
       const expectedNote = normalizeNote(song.notes[currentNoteIndex]);
 
       if (note === expectedNote) {
         const beatDuration = song.durations[currentNoteIndex];
         const noteDurationMs = beatDuration * (60 / metronomeBPM) * 1000;
-
         audioEngineRef.current.playNote(note, volume, noteDurationMs);
         setActiveNotes(prev => new Set(prev).add(note));
-
         const releaseBuffer = 50;
-        setTimeout(() => {
-          stopNote(note);
-        }, noteDurationMs - releaseBuffer);
-
+        setTimeout(() => stopNote(note), noteDurationMs - releaseBuffer);
         setCurrentNoteIndex(prev => prev + 1);
-
         if (currentNoteIndex + 1 >= song.notes.length) {
           setIsPracticeMode(false);
         }
@@ -143,7 +127,6 @@ function App() {
     }
 
     audioEngineRef.current.playNote(note, volume);
-
     setActiveNotes(prev => {
       const newSet = new Set(prev);
       if (newSet.has(note)) {
@@ -152,24 +135,19 @@ function App() {
       }
       return prev;
     });
-
     setTimeout(() => {
       setActiveNotes(prev => new Set(prev).add(note));
     }, 0);
-
   }, [volume, isMuted, isPracticeMode, currentSong, currentNoteIndex, metronomeBPM, stopNote]);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     const key = event.key.toLowerCase();
     if (pressedKeys.current.has(key) || event.repeat) return;
-
     const mapping = keyboardMapping[key];
     if (mapping) {
       event.preventDefault();
       pressedKeys.current.add(key);
-
       let noteToPlay: string;
-
       if (event.shiftKey && !['E', 'B'].includes(mapping.note)) {
         noteToPlay = `${mapping.note}#${mapping.octave}`;
       } else if (event.altKey && !['C', 'F'].includes(mapping.note)) {
@@ -177,7 +155,6 @@ function App() {
       } else {
         noteToPlay = `${mapping.note}${mapping.octave}`;
       }
-
       playNote(noteToPlay);
       activeKeyToNoteMap.current.set(key, noteToPlay);
     }
@@ -186,9 +163,7 @@ function App() {
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
     const key = event.key.toLowerCase();
     pressedKeys.current.delete(key);
-
     const noteToStop = activeKeyToNoteMap.current.get(key);
-
     if (noteToStop) {
       stopNote(noteToStop);
       activeKeyToNoteMap.current.delete(key);
@@ -198,7 +173,6 @@ function App() {
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
@@ -208,11 +182,8 @@ function App() {
   const playSong = useCallback((song: { notes: string[]; durations: number[] }) => {
     setIsPlaying(true);
     setCurrentNoteIndex(0);
-
     const beatDurationMs = (60 / metronomeBPM) * 1000; 
-
     let noteIndex = 0;
-
     const playNextNote = () => {
       if (noteIndex >= song.notes.length) {
         setCurrentSong('');
@@ -220,11 +191,9 @@ function App() {
         setCurrentNoteIndex(0);
         return;
       }
-
       setCurrentNoteIndex(noteIndex);
       const note = song.notes[noteIndex];
       const duration = song.durations[noteIndex] * beatDurationMs;
-
       const previousNote = noteIndex > 0 ? song.notes[noteIndex - 1] : null;
       const isRepeatedNote = note === previousNote && note !== 'rest';
 
@@ -232,9 +201,7 @@ function App() {
         if (isRepeatedNote) {
           const articulationGap = Math.min(50, duration * 0.1);
           const actualNoteDuration = duration - articulationGap;
-
           stopNote(note);
-
           setTimeout(() => {
             playNote(note, actualNoteDuration);
             setTimeout(() => stopNote(note), actualNoteDuration);
@@ -244,19 +211,15 @@ function App() {
           setTimeout(() => stopNote(note), duration);
         }
       }
-
       noteIndex++;
       songTimeoutRef.current = window.setTimeout(playNextNote, duration);
     };
-
     playNextNote();
   }, [playNote, stopNote, isMuted, isPracticeMode, metronomeBPM]);
 
   const handleTogglePlay = () => {
     if (isPlaying) {
-      if (songTimeoutRef.current) {
-        clearTimeout(songTimeoutRef.current);
-      }
+      if (songTimeoutRef.current) clearTimeout(songTimeoutRef.current);
       setIsPlaying(false);
       setIsPracticeMode(false);
       setCurrentNoteIndex(0);
@@ -269,230 +232,141 @@ function App() {
   const handleToggleMute = () => {
     const newMutedState = !isMuted;
     setIsMuted(newMutedState);
-
     if (newMutedState && currentSong) {
       setIsPracticeMode(true);
       setIsPlaying(false);
       setCurrentNoteIndex(0);
-      if (songTimeoutRef.current) {
-        clearTimeout(songTimeoutRef.current);
-      }
+      if (songTimeoutRef.current) clearTimeout(songTimeoutRef.current);
     } else {
       setIsPracticeMode(false);
     }
   };
 
   const handleSongSelect = (songName: string) => {
-    if (songTimeoutRef.current) {
-      clearTimeout(songTimeoutRef.current);
-    }
+    if (songTimeoutRef.current) clearTimeout(songTimeoutRef.current);
     setIsPlaying(false);
     setCurrentNoteIndex(0);
     setIsPracticeMode(false);
     setCurrentSong(songName);
   };
 
+  // Retro CSS Helper Classes (Imagine these in your Tailwind config or global CSS)
+  const retroBtnBase = "border-2 border-slate-800 transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none font-bold uppercase tracking-wider";
+  const retroCardBase = "bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(30,41,59,1)]";
+
   return (
-    <div className="min-h-screen bg-[#F3E8FF]">
+    <div className="min-h-screen bg-[#F3E8FF] text-slate-800">
       <div className="container mx-auto px-2 py-2 flex flex-col min-h-screen">
         {/* Header */}
         <div className="text-center mb-2">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Music className="w-5 h-5 text-purple-700" />
-            <h1 className="text-xl font-bold text-slate-800">Key-Piano</h1>
+            <Music className="w-6 h-6 text-purple-700" />
+            <h1 className="text-2xl font-black italic tracking-tighter text-slate-900">KEY-PIANO</h1>
           </div>
-          <p className="text-xs text-purple-800 font-medium"></p>
+          <p className="text-xs text-purple-900 font-bold opacity-80"></p>
         </div>
 
         {/* Mobile Controls Toggle */}
         <div className="lg:hidden mb-2">
           <button
             onClick={() => setShowMobileControls(!showMobileControls)}
-            className="w-full p-2 bg-purple-200 hover:bg-purple-300 text-purple-900 rounded-lg flex items-center justify-center gap-2 font-semibold border border-purple-300"
+            className={`${retroBtnBase} w-full p-2 bg-purple-200 hover:bg-purple-300 text-purple-900 rounded-none flex items-center justify-center gap-2 shadow-[2px_2px_0px_0px_rgba(30,41,59,1)]`}
           >
-            {showMobileControls ? (
-              <>
-                <EyeOff className="w-4 h-4" />
-                Hide Controls
-              </>
-            ) : (
-              <>
-                <Eye className="w-4 h-4" />
-                Show Controls
-              </>
-            )}
+            {showMobileControls ? <><EyeOff className="w-4 h-4" /> HIDE</> : <><Eye className="w-4 h-4" /> MENU</>}
           </button>
         </div>
 
-        {/* Main Content - Responsive Layout */}
-        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-3 gap-2 min-h-0">
-          {/* Left Column - Controls and Songs (Desktop) */}
-          <div className="hidden lg:flex flex-col space-y-3">
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-3 gap-4 min-h-0">
+          {/* Left Column */}
+          <div className="hidden lg:flex flex-col space-y-4">
             {/* Desktop Controls */}
-            <div className="bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl p-3 shadow-sm">
+            <div className={`${retroCardBase} rounded-none p-3`}>
               <div className="grid grid-cols-2 gap-3">
-                {/* Volume Control */}
                 <div>
-                  <label className="block text-xs font-bold text-purple-900 mb-1">
-                    <div className="flex items-center gap-1">
-                      <Volume2 className="w-3 h-3" />
-                      Vol: {Math.round(volume * 100)}%
-                    </div>
-                  </label>
+                  <label className="block text-[10px] font-black text-slate-500 mb-1">VOLUME_OUT</label>
                   <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={volume}
+                    type="range" min="0" max="1" step="0.1" value={volume}
                     onChange={(e) => setVolume(parseFloat(e.target.value))}
-                    className="w-full h-1.5 bg-purple-200 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-full accent-purple-600 cursor-pointer"
                   />
                 </div>
 
-                {/* Metronome Control */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-purple-900 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {metronomeBPM} BPM
-                    </label>
+                    <label className="text-[10px] font-black text-slate-500">TEMPO_BPM</label>
                     <button
                       onClick={() => setIsMetronomeOn(!isMetronomeOn)}
-                      className={`
-                        px-2 py-0.5 rounded text-xs font-bold transition-all duration-200
-                        ${isMetronomeOn
-                          ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                          : 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300'
-                        }
-                      `}
+                      className={`${retroBtnBase} px-2 py-0.5 text-[10px] rounded-none ${isMetronomeOn ? 'bg-green-400 text-slate-900' : 'bg-slate-200'}`}
                     >
                       {isMetronomeOn ? 'ON' : 'OFF'}
                     </button>
                   </div>
                   <input
-                    type="range"
-                    min="40"
-                    max="240"
-                    step="5"
-                    value={metronomeBPM}
+                    type="range" min="40" max="240" step="5" value={metronomeBPM}
                     onChange={(e) => setMetronomeBPM(parseInt(e.target.value))}
-                    className="w-full h-1.5 bg-purple-200 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-full accent-purple-600"
                     disabled={!isMetronomeOn}
                   />
-                  {isMetronomeOn && (
-                    <div className="text-[10px] text-purple-600 mt-0.5 font-bold">
-                      {isPlaying ? "• Synced to song" : "• Ready"}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
 
             {/* Sample Songs */}
-            <div className="bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl p-3 flex-1 min-h-0 shadow-sm">
-              <h3 className="text-sm font-bold text-slate-800 mb-2 text-center uppercase tracking-tight">Sample Songs</h3>
-
-              <div className="space-y-1.5 max-h-full overflow-y-auto pr-1">
+            <div className={`${retroCardBase} rounded-none p-4 flex-1 min-h-0 flex flex-col`}>
+              <h3 className="text-xs font-black mb-3 border-b-2 border-slate-800 pb-1">LIBRARY_INDEX</h3>
+              <div className="space-y-2 overflow-y-auto pr-1 flex-1">
                 {Object.keys(sampleSongs).map(songName => (
                   <button
                     key={songName}
                     onClick={() => handleSongSelect(songName)}
-                    className={`
-                      w-full p-2 rounded-lg font-bold transition-all duration-200 text-xs text-left
-                      ${currentSong === songName
-                        ? 'bg-purple-600 text-white shadow-md'
-                        : 'bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-100'
-                      }
-                    `}
+                    className={`${retroBtnBase} w-full p-2 text-xs text-left rounded-none ${currentSong === songName ? 'bg-purple-600 text-white shadow-none translate-x-[2px] translate-y-[2px]' : 'bg-white hover:bg-purple-50 shadow-[2px_2px_0px_0px_rgba(30,41,59,1)]'}`}
                   >
-                    <span className="capitalize">{songName.replace(/([A-Z])/g, ' $1').trim()}</span>
+                    {songName.replace(/([A-Z])/g, ' $1').trim()}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Keyboard Settings */}
             <div className="mt-auto">
-              <KeyboardSettings
-                mapping={keyboardMapping}
-                onMappingChange={setKeyboardMapping}
-              />
+              <KeyboardSettings mapping={keyboardMapping} onMappingChange={setKeyboardMapping} />
             </div>
           </div>
 
-          {/* Mobile Controls (shown when toggled) */}
+          {/* Mobile Overlay */}
           {showMobileControls && (
-            <div className="lg:hidden space-y-2 mb-2">
-              <div className="bg-white/80 border border-purple-200 rounded-lg p-2 shadow-sm">
-                <div className="grid grid-cols-2 gap-2">
+            <div className="lg:hidden space-y-3 mb-2 animate-in fade-in slide-in-from-top-4">
+              <div className={`${retroCardBase} p-3`}>
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-purple-900 mb-1">
-                      <div className="flex items-center gap-1">
-                        <Volume2 className="w-3 h-3" />
-                        Vol: {Math.round(volume * 100)}%
-                      </div>
-                    </label>
+                    <label className="block text-[10px] font-black text-slate-500 mb-1">VOLUME</label>
                     <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.1"
-                      value={volume}
+                      type="range" min="0" max="1" step="0.1" value={volume}
                       onChange={(e) => setVolume(parseFloat(e.target.value))}
-                      className="w-full h-1.5 bg-purple-200 rounded-lg appearance-none cursor-pointer slider"
+                      className="w-full accent-purple-600"
                     />
                   </div>
-
                   <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-xs font-bold text-purple-900 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {metronomeBPM}
-                      </label>
-                      <button
-                        onClick={() => setIsMetronomeOn(!isMetronomeOn)}
-                        className={`
-                          px-2 py-0.5 rounded text-xs font-bold transition-all duration-200
-                          ${isMetronomeOn
-                            ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                            : 'bg-purple-100 text-purple-800 border border-purple-300'
-                          }
-                        `}
-                      >
-                        {isMetronomeOn ? 'ON' : 'OFF'}
-                      </button>
-                    </div>
-                    <input
-                      type="range"
-                      min="40"
-                      max="240"
-                      step="5"
-                      value={metronomeBPM}
-                      onChange={(e) => setMetronomeBPM(parseInt(e.target.value))}
-                      className="w-full h-1.5 bg-purple-200 rounded-lg appearance-none cursor-pointer slider"
-                      disabled={!isMetronomeOn}
-                    />
+                    <button
+                      onClick={() => setIsMetronomeOn(!isMetronomeOn)}
+                      className={`${retroBtnBase} w-full p-1 text-[10px] ${isMetronomeOn ? 'bg-green-400' : 'bg-slate-200'}`}
+                    >
+                      METRONOME: {isMetronomeOn ? 'ON' : 'OFF'}
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white/80 border border-purple-200 rounded-lg p-2 shadow-sm">
-                <h3 className="text-xs font-bold text-slate-800 mb-2 text-center">Sample Songs</h3>
-                <div className="grid grid-cols-2 gap-1.5">
+              <div className={`${retroCardBase} p-3`}>
+                <h3 className="text-[10px] font-black mb-2 text-center uppercase tracking-widest">Select Track</h3>
+                <div className="grid grid-cols-2 gap-2">
                   {Object.keys(sampleSongs).map(songName => (
                     <button
                       key={songName}
                       onClick={() => handleSongSelect(songName)}
-                      className={`
-                        p-2 rounded-lg font-bold transition-all duration-200 text-[10px] text-center
-                        ${currentSong === songName
-                          ? 'bg-purple-600 text-white shadow-md'
-                          : 'bg-purple-50 text-purple-800 border border-purple-100'
-                        }
-                      `}
+                      className={`${retroBtnBase} p-2 text-[10px] ${currentSong === songName ? 'bg-purple-600 text-white shadow-none' : 'bg-white shadow-[2px_2px_0px_0px_rgba(30,41,59,1)]'}`}
                     >
-                      <span className="capitalize">{songName.replace(/([A-Z])/g, ' $1').trim()}</span>
+                      {songName.substring(0, 12)}
                     </button>
                   ))}
                 </div>
@@ -500,30 +374,32 @@ function App() {
             </div>
           )}
 
-          {/* Musical Score - Dark Section Preserved */}
+          {/* Musical Score */}
           <div className="lg:col-span-2 flex-1 min-h-0">
-            <MusicalScore
-              currentSong={currentSong}
-              isPlaying={isPlaying}
-              isMuted={isMuted}
-              isPracticeMode={isPracticeMode}
-              currentNoteIndex={currentNoteIndex}
-              onTogglePlay={handleTogglePlay}
-              onToggleMute={handleToggleMute}
-              onShowHint={() => setShowHint(true)}
-              songData={currentSong ? {
-                ...sampleSongs[currentSong],
-                title: currentSong.replace(/([A-Z])/g, ' $1').trim()
-              } : undefined}
-              keyboardMapping={keyboardMapping}
-              showHint={showHint}
-              onCloseHint={() => setShowHint(false)}
-            />
+            <div className="h-full border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(30,41,59,1)]">
+              <MusicalScore
+                currentSong={currentSong}
+                isPlaying={isPlaying}
+                isMuted={isMuted}
+                isPracticeMode={isPracticeMode}
+                currentNoteIndex={currentNoteIndex}
+                onTogglePlay={handleTogglePlay}
+                onToggleMute={handleToggleMute}
+                onShowHint={() => setShowHint(true)}
+                songData={currentSong ? {
+                  ...sampleSongs[currentSong],
+                  title: currentSong.replace(/([A-Z])/g, ' $1').trim()
+                } : undefined}
+                keyboardMapping={keyboardMapping}
+                showHint={showHint}
+                onCloseHint={() => setShowHint(false)}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Piano Component */}
-        <div className="mt-2 bg-white/50 p-2 rounded-xl border border-purple-200 shadow-sm">
+        {/* Piano Section */}
+        <div className="mt-4 p-2 bg-slate-100 border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(30,41,59,1)]">
           <Piano
             activeNotes={activeNotes}
             onNotePlay={playNote}
@@ -531,18 +407,16 @@ function App() {
           />
         </div>
 
-        {/* Keyboard Settings for Mobile */}
-        <div className="lg:hidden mt-2">
-          <KeyboardSettings
-            mapping={keyboardMapping}
-            onMappingChange={setKeyboardMapping}
-          />
+        {/* Mobile Mapping */}
+        <div className="lg:hidden mt-4">
+          <KeyboardSettings mapping={keyboardMapping} onMappingChange={setKeyboardMapping} />
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-2 text-purple-900 text-[10px] font-bold uppercase tracking-wider">
-          <p className="hidden sm:block">| Develop By Sadrita Neogi ( Hack Club ) |  </p>
-          <p className="sm:hidden">Tap piano keys to play • Use keyboard for desktop</p>
+        <div className="text-center mt-4 text-slate-500">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] border-t border-slate-300 pt-2">
+           |  DESIGNED BY SADRITA NEOGI ( HACK CLUB ) | 
+          </p>
         </div>
       </div>
     </div>

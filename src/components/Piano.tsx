@@ -1,4 +1,4 @@
-// src/components/Piano.ts
+// src/components/Piano.tsx
 
 import React, { useMemo } from 'react';
 import { normalizeNote } from '../utils/musicUtils';
@@ -12,13 +12,12 @@ interface PianoProps {
 
 const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 
-// Define the systematic black key block pattern
 const blackKeyBlock = [
-  { note: 'C#', flatNote: 'Db', position: 36 },   // Between C and D
-  { note: 'D#', flatNote: 'Eb', position: 88 },   // Between D and E
-  { note: 'F#', flatNote: 'Gb', position: 192 },  // Between F and G
-  { note: 'G#', flatNote: 'Ab', position: 244 },  // Between G and A
-  { note: 'A#', flatNote: 'Bb', position: 296 },  // Between A and B
+  { note: 'C#', flatNote: 'Db', position: 36 },
+  { note: 'D#', flatNote: 'Eb', position: 88 },
+  { note: 'F#', flatNote: 'Gb', position: 192 },
+  { note: 'G#', flatNote: 'Ab', position: 244 },
+  { note: 'A#', flatNote: 'Bb', position: 296 },
 ];
 
 export const Piano: React.FC<PianoProps> = ({ activeNotes, onNotePlay, onNoteStop, timingFeedback = {} }) => {
@@ -26,13 +25,10 @@ export const Piano: React.FC<PianoProps> = ({ activeNotes, onNotePlay, onNoteSto
 
   const normalizedActiveNotes = useMemo(() => {
     const normalizedSet = new Set<string>();
-    activeNotes.forEach(note => {
-      normalizedSet.add(normalizeNote(note));
-    });
+    activeNotes.forEach(note => normalizedSet.add(normalizeNote(note)));
     return normalizedSet;
   }, [activeNotes]);
 
-  // This does the same for the keys of the timingFeedback object.
   const normalizedTimingFeedback = useMemo(() => {
     const normalizedObj: { [key: string]: 'correct' | 'incorrect' | null } = {};
     for (const key in timingFeedback) {
@@ -41,31 +37,23 @@ export const Piano: React.FC<PianoProps> = ({ activeNotes, onNotePlay, onNoteSto
     return normalizedObj;
   }, [timingFeedback]);
 
-  // Checks the piano's note against the PRE-NORMALIZED set.
-  const isNoteActive = (note: string) => {
-    return normalizedActiveNotes.has(normalizeNote(note));
-  };
+  const isNoteActive = (note: string) => normalizedActiveNotes.has(normalizeNote(note));
+  const getNoteFeedback = (note: string) => normalizedTimingFeedback[normalizeNote(note)];
 
-  // Looks up the piano's note in the PRE-NORMALIZED feedback object.
-  const getNoteFeedback = (note: string) => {
-    return normalizedTimingFeedback[normalizeNote(note)];
-  };
+  const handleMouseDown = (note: string, octave: number) => onNotePlay(`${note}${octave}`);
+  const handleMouseUp = (note: string, octave: number) => onNoteStop(`${note}${octave}`);
 
-  const handleMouseDown = (note: string, octave: number) => {
-    onNotePlay(`${note}${octave}`);
-  };
+  const octaveWidth = 7 * 52;
 
-  const handleMouseUp = (note: string, octave: number) => {
-    onNoteStop(`${note}${octave}`);
-  };
-
-  // Calculate octave width (7 white keys * (width + margin))
-  const octaveWidth = 7 * 52; // 48px width + 4px margin
+  // Retro design constants
+  const retroBorder = "border-2 border-slate-950";
+  const activeShift = "translate-x-[2px] translate-y-[2px] shadow-none";
 
   return (
-    <div className="bg-gradient-to-b from-gray-800 to-gray-900 p-6 rounded-2xl shadow-2xl">
+    <div className="bg-slate-950 p-6 rounded-none border-t-4 border-slate-800 shadow-[0_8px_0_0_rgba(30,41,59,1)]">
       <div className="relative flex justify-center">
-        <div className="relative inline-flex">
+        <div className="relative inline-flex bg-slate-900 p-1 border-2 border-slate-800">
+          
           {/* White Keys */}
           <div className="flex">
             {octaves.map(octave => (
@@ -79,18 +67,18 @@ export const Piano: React.FC<PianoProps> = ({ activeNotes, onNotePlay, onNoteSto
                     <button
                       key={fullNote}
                       className={`
-                        w-12 h-40 mx-0.5 rounded-b-lg transition-all duration-75 transform
-                        border-2 border-gray-300 shadow-lg
-                        ${feedback === 'correct' ? 'bg-green-400 border-green-500 shadow-green-500/50' : ''}
-                        ${feedback === 'incorrect' ? 'bg-red-400 border-red-500 shadow-red-500/50' : ''}
-                        ${!feedback && isActive ? 'bg-purple-400 border-purple-500 scale-95 shadow-purple-500/50' : ''}
-                        ${!feedback && !isActive ? 'bg-white hover:bg-gray-50 active:scale-95' : ''}
+                        w-12 h-40 mx-0.5 rounded-none transition-all duration-75
+                        ${retroBorder}
+                        ${feedback === 'correct' ? 'bg-green-500 border-slate-950 shadow-none ' + activeShift : ''}
+                        ${feedback === 'incorrect' ? 'bg-red-500 border-slate-950 shadow-none ' + activeShift : ''}
+                        ${!feedback && isActive ? 'bg-purple-500 border-slate-950 ' + activeShift : 'shadow-[3px_3px_0_0_rgba(0,0,0,1)]'}
+                        ${!feedback && !isActive ? 'bg-slate-50 hover:bg-white active:' + activeShift : ''}
                       `}
                       onMouseDown={() => handleMouseDown(note, octave)}
                       onMouseUp={() => handleMouseUp(note, octave)}
                       onMouseLeave={() => handleMouseUp(note, octave)}
                     >
-                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-600">
+                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[10px] font-black text-slate-900 uppercase">
                         {note}{octave}
                       </div>
                     </button>
@@ -116,21 +104,22 @@ export const Piano: React.FC<PianoProps> = ({ activeNotes, onNotePlay, onNoteSto
                     <button
                       key={sharpNoteFull}
                       className={`
-                        absolute w-8 h-24 rounded-b-lg transition-all duration-75 transform pointer-events-auto
-                        border border-gray-900 shadow-lg
-                        ${feedback === 'correct' ? 'bg-purple-600 border-purple-700 scale-95 shadow-purple-600/50' : ''}
-                        ${feedback === 'incorrect' ? 'bg-red-400 border-red-500 shadow-red-500/50' : ''}
-                        ${!feedback && isActive ? 'bg-purple-600 border-purple-700 scale-95 shadow-purple-600/50' : ''}
-                        ${!feedback && !isActive ? 'bg-gray-900 hover:bg-gray-800 active:scale-95' : ''}
+                        absolute w-8 h-24 rounded-none transition-all duration-75 pointer-events-auto
+                        border-2 border-slate-950
+                        ${feedback === 'correct' ? 'bg-green-600 ' + activeShift : ''}
+                        ${feedback === 'incorrect' ? 'bg-red-600 ' + activeShift : ''}
+                        ${!feedback && isActive ? 'bg-purple-700 ' + activeShift : 'shadow-[2px_2px_0_0_rgba(0,0,0,1)]'}
+                        ${!feedback && !isActive ? 'bg-slate-800 hover:bg-slate-700 active:' + activeShift : ''}
                       `}
                       style={{ left: `${absolutePosition}px`, zIndex: 10 }}
                       onMouseDown={() => handleMouseDown(note, octave)}
                       onMouseUp={() => handleMouseUp(note, octave)}
                       onMouseLeave={() => handleMouseUp(note, octave)}
                     >
-                      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 text-xs font-medium text-white text-center leading-tight">
-                        <div>{sharpNoteFull}</div>
-                        <div>{flatNoteFull}</div>
+                      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 text-[8px] font-bold text-slate-400 text-center leading-none">
+                        <div>{note}</div>
+                        <div className="border-t border-slate-700 my-1"></div>
+                        <div>{flatNote}</div>
                       </div>
                     </button>
                   );
