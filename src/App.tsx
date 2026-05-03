@@ -314,7 +314,7 @@ function App() {
 
             {/* Sample Songs */}
             <div className={`${retroCardBase} rounded-none p-4 flex-1 min-h-0 flex flex-col`}>
-              <h3 className="text-xs font-black mb-3 border-b-2 border-slate-800 pb-1">LIBRARY_INDEX</h3>
+              <h3 className="text-xs font-black mb-3 border-b-2 border-slate-800 pb-1">SONG LIBRARY</h3>
               <div className="space-y-2 overflow-y-auto pr-1 flex-1">
                 {Object.keys(sampleSongs).map(songName => (
                   <button
