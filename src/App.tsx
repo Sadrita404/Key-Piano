@@ -85,15 +85,12 @@ function App() {
 
   // Automatically skip 'rest' notes in practice mode
   useEffect(() => {
-    // We only run this logic in practice mode with a valid song
     if (isPracticeMode && currentSong && sampleSongs[currentSong]) {
       const song = sampleSongs[currentSong];
 
-      // Ensure we're not at the end of the song
       if (currentNoteIndex < song.notes.length) {
         const currentNote = song.notes[currentNoteIndex];
 
-        // If the current note is a rest, schedule a skip
         if (currentNote === 'rest') {
           const beatDuration = song.durations[currentNoteIndex];
           const restDurationMs = beatDuration * (60 / metronomeBPM) * 1000;
@@ -110,29 +107,24 @@ function App() {
     if (!audioEngineRef.current) return;
     const note = normalizeNote(rawNote);
 
-    // If the duration is provided, it's a song note from autoplay.
     if (duration) {
       if (!isMuted) {
         audioEngineRef.current.playNote(note, volume, duration);
       }
       setActiveNotes(prev => new Set(prev).add(note));
-      return; // End here for autoplay notes
+      return; 
     }
 
-    // Check if we are in practice mode and the note is correct
     if (isPracticeMode && currentSong && sampleSongs[currentSong]) {
       const song = sampleSongs[currentSong];
-      // Make sure we're not stuck on a rest (though the useEffect should handle this)
       if (song.notes[currentNoteIndex] === 'rest') return;
 
       const expectedNote = normalizeNote(song.notes[currentNoteIndex]);
 
       if (note === expectedNote) {
-        // Calculate the note's duration based on the song's tempo
         const beatDuration = song.durations[currentNoteIndex];
         const noteDurationMs = beatDuration * (60 / metronomeBPM) * 1000;
 
-        // Play the audio and visuals for the correct duration
         audioEngineRef.current.playNote(note, volume, noteDurationMs);
         setActiveNotes(prev => new Set(prev).add(note));
 
@@ -141,17 +133,15 @@ function App() {
           stopNote(note);
         }, noteDurationMs - releaseBuffer);
 
-        // Advance to the next note in the song
         setCurrentNoteIndex(prev => prev + 1);
 
         if (currentNoteIndex + 1 >= song.notes.length) {
           setIsPracticeMode(false);
         }
-        return; // Handled, so we exit
+        return;
       }
     }
 
-    // Default handling for FREE PLAY or an INCORRECT NOTE in practice mode
     audioEngineRef.current.playNote(note, volume);
 
     setActiveNotes(prev => {
@@ -175,13 +165,11 @@ function App() {
 
     const mapping = keyboardMapping[key];
     if (mapping) {
-      // Prevent browser shortcuts (e.g., Alt+F opening a menu)
       event.preventDefault();
       pressedKeys.current.add(key);
 
       let noteToPlay: string;
 
-      // Determine the note based on modifiers (Shift > Alt > Natural)
       if (event.shiftKey && !['E', 'B'].includes(mapping.note)) {
         noteToPlay = `${mapping.note}#${mapping.octave}`;
       } else if (event.altKey && !['C', 'F'].includes(mapping.note)) {
@@ -190,22 +178,19 @@ function App() {
         noteToPlay = `${mapping.note}${mapping.octave}`;
       }
 
-      // Play the note and store the mapping
       playNote(noteToPlay);
       activeKeyToNoteMap.current.set(key, noteToPlay);
     }
-  }, [octave, playNote, keyboardMapping]);
+  }, [playNote, keyboardMapping]);
 
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
     const key = event.key.toLowerCase();
     pressedKeys.current.delete(key);
 
-    // Look up which note was actually played by this key
     const noteToStop = activeKeyToNoteMap.current.get(key);
 
     if (noteToStop) {
       stopNote(noteToStop);
-      // Clean up the mapping
       activeKeyToNoteMap.current.delete(key);
     }
   }, [stopNote]);
@@ -224,7 +209,6 @@ function App() {
     setIsPlaying(true);
     setCurrentNoteIndex(0);
 
-    // Use metronome BPM for song tempo (quarter note = 1 beat)
     const beatDurationMs = (60 / metronomeBPM) * 1000; 
 
     let noteIndex = 0;
@@ -241,27 +225,21 @@ function App() {
       const note = song.notes[noteIndex];
       const duration = song.durations[noteIndex] * beatDurationMs;
 
-      // Check if this note is the same as the previous note (for articulation)
       const previousNote = noteIndex > 0 ? song.notes[noteIndex - 1] : null;
       const isRepeatedNote = note === previousNote && note !== 'rest';
 
-      // Only play automatic song notes when not in practice mode
       if (note !== 'rest' && !isMuted && !isPracticeMode) {
         if (isRepeatedNote) {
-          // For repeated notes, add a brief gap for articulation
-          const articulationGap = Math.min(50, duration * 0.1); // 10% of duration or 50ms, whichever is smaller
+          const articulationGap = Math.min(50, duration * 0.1);
           const actualNoteDuration = duration - articulationGap;
 
-          // Stop the previous note first (if it's still playing)
           stopNote(note);
 
-          // Small delay before playing the new note
           setTimeout(() => {
             playNote(note, actualNoteDuration);
             setTimeout(() => stopNote(note), actualNoteDuration);
           }, articulationGap);
         } else {
-          // Normal note playing
           playNote(note, duration);
           setTimeout(() => stopNote(note), duration);
         }
@@ -276,7 +254,6 @@ function App() {
 
   const handleTogglePlay = () => {
     if (isPlaying) {
-      // Stop current song
       if (songTimeoutRef.current) {
         clearTimeout(songTimeoutRef.current);
       }
@@ -284,7 +261,6 @@ function App() {
       setIsPracticeMode(false);
       setCurrentNoteIndex(0);
     } else if (currentSong) {
-      // Resume or restart current song
       setIsPracticeMode(false);
       playSong(sampleSongs[currentSong]);
     }
@@ -295,7 +271,6 @@ function App() {
     setIsMuted(newMutedState);
 
     if (newMutedState && currentSong) {
-      // Entering practice mode
       setIsPracticeMode(true);
       setIsPlaying(false);
       setCurrentNoteIndex(0);
@@ -303,13 +278,11 @@ function App() {
         clearTimeout(songTimeoutRef.current);
       }
     } else {
-      // Exiting practice mode
       setIsPracticeMode(false);
     }
   };
 
   const handleSongSelect = (songName: string) => {
-    // Stop any currently playing song
     if (songTimeoutRef.current) {
       clearTimeout(songTimeoutRef.current);
     }
@@ -320,22 +293,22 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-[#F3E8FF]">
       <div className="container mx-auto px-2 py-2 flex flex-col min-h-screen">
         {/* Header */}
         <div className="text-center mb-2">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Music className="w-5 h-5 text-purple-400" />
-            <h1 className="text-xl font-bold text-white">Key-Piano</h1>
+            <Music className="w-5 h-5 text-purple-700" />
+            <h1 className="text-xl font-bold text-slate-800">Key-Piano</h1>
           </div>
-          <p className="text-xs text-purple-200">Play music using your computer keyboard By Sadrita Neogi ( Hack Club )</p>
+          <p className="text-xs text-purple-800 font-medium"></p>
         </div>
 
         {/* Mobile Controls Toggle */}
         <div className="lg:hidden mb-2">
           <button
             onClick={() => setShowMobileControls(!showMobileControls)}
-            className="w-full p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg flex items-center justify-center gap-2"
+            className="w-full p-2 bg-purple-200 hover:bg-purple-300 text-purple-900 rounded-lg flex items-center justify-center gap-2 font-semibold border border-purple-300"
           >
             {showMobileControls ? (
               <>
@@ -356,11 +329,11 @@ function App() {
           {/* Left Column - Controls and Songs (Desktop) */}
           <div className="hidden lg:flex flex-col space-y-3">
             {/* Desktop Controls */}
-            <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-xl p-3">
+            <div className="bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl p-3 shadow-sm">
               <div className="grid grid-cols-2 gap-3">
                 {/* Volume Control */}
                 <div>
-                  <label className="block text-xs font-medium text-purple-300 mb-1">
+                  <label className="block text-xs font-bold text-purple-900 mb-1">
                     <div className="flex items-center gap-1">
                       <Volume2 className="w-3 h-3" />
                       Vol: {Math.round(volume * 100)}%
@@ -373,24 +346,24 @@ function App() {
                     step="0.1"
                     value={volume}
                     onChange={(e) => setVolume(parseFloat(e.target.value))}
-                    className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-full h-1.5 bg-purple-200 rounded-lg appearance-none cursor-pointer slider"
                   />
                 </div>
 
                 {/* Metronome Control */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-medium text-purple-300 flex items-center gap-1">
+                    <label className="text-xs font-bold text-purple-900 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {metronomeBPM} BPM
                     </label>
                     <button
                       onClick={() => setIsMetronomeOn(!isMetronomeOn)}
                       className={`
-                        px-2 py-0.5 rounded text-xs font-medium transition-all duration-200
+                        px-2 py-0.5 rounded text-xs font-bold transition-all duration-200
                         ${isMetronomeOn
-                          ? 'bg-green-600 hover:bg-green-700 text-white'
-                          : 'bg-slate-600 hover:bg-slate-500 text-slate-200'
+                          ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                          : 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300'
                         }
                       `}
                     >
@@ -404,11 +377,11 @@ function App() {
                     step="5"
                     value={metronomeBPM}
                     onChange={(e) => setMetronomeBPM(parseInt(e.target.value))}
-                    className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-full h-1.5 bg-purple-200 rounded-lg appearance-none cursor-pointer slider"
                     disabled={!isMetronomeOn}
                   />
                   {isMetronomeOn && (
-                    <div className="text-xs text-green-400 mt-0.5">
+                    <div className="text-[10px] text-purple-600 mt-0.5 font-bold">
                       {isPlaying ? "• Synced to song" : "• Ready"}
                     </div>
                   )}
@@ -417,19 +390,19 @@ function App() {
             </div>
 
             {/* Sample Songs */}
-            <div className="bg-gradient-to-r from-emerald-900/40 to-teal-900/40 rounded-xl p-3 flex-1 min-h-0">
-              <h3 className="text-sm font-semibold text-white mb-2 text-center">Sample Songs</h3>
+            <div className="bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl p-3 flex-1 min-h-0 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-800 mb-2 text-center uppercase tracking-tight">Sample Songs</h3>
 
-              <div className="space-y-1.5 max-h-full overflow-y-auto">
+              <div className="space-y-1.5 max-h-full overflow-y-auto pr-1">
                 {Object.keys(sampleSongs).map(songName => (
                   <button
                     key={songName}
                     onClick={() => handleSongSelect(songName)}
                     className={`
-                      w-full p-2 rounded-lg font-medium transition-all duration-200 text-sm
+                      w-full p-2 rounded-lg font-bold transition-all duration-200 text-xs text-left
                       ${currentSong === songName
-                        ? 'bg-emerald-600 text-white shadow-lg'
-                        : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
+                        ? 'bg-purple-600 text-white shadow-md'
+                        : 'bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-100'
                       }
                     `}
                   >
@@ -451,12 +424,10 @@ function App() {
           {/* Mobile Controls (shown when toggled) */}
           {showMobileControls && (
             <div className="lg:hidden space-y-2 mb-2">
-              {/* Volume and Metronome Controls */}
-              <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg p-2">
+              <div className="bg-white/80 border border-purple-200 rounded-lg p-2 shadow-sm">
                 <div className="grid grid-cols-2 gap-2">
-                  {/* Volume Control */}
                   <div>
-                    <label className="block text-xs font-medium text-purple-300 mb-1">
+                    <label className="block text-xs font-bold text-purple-900 mb-1">
                       <div className="flex items-center gap-1">
                         <Volume2 className="w-3 h-3" />
                         Vol: {Math.round(volume * 100)}%
@@ -469,24 +440,23 @@ function App() {
                       step="0.1"
                       value={volume}
                       onChange={(e) => setVolume(parseFloat(e.target.value))}
-                      className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
+                      className="w-full h-1.5 bg-purple-200 rounded-lg appearance-none cursor-pointer slider"
                     />
                   </div>
 
-                  {/* Metronome Control */}
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="text-xs font-medium text-purple-300 flex items-center gap-1">
+                      <label className="text-xs font-bold text-purple-900 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {metronomeBPM}
                       </label>
                       <button
                         onClick={() => setIsMetronomeOn(!isMetronomeOn)}
                         className={`
-                          px-2 py-0.5 rounded text-xs font-medium transition-all duration-200
+                          px-2 py-0.5 rounded text-xs font-bold transition-all duration-200
                           ${isMetronomeOn
-                            ? 'bg-green-600 hover:bg-green-700 text-white'
-                            : 'bg-slate-600 hover:bg-slate-500 text-slate-200'
+                            ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                            : 'bg-purple-100 text-purple-800 border border-purple-300'
                           }
                         `}
                       >
@@ -500,26 +470,25 @@ function App() {
                       step="5"
                       value={metronomeBPM}
                       onChange={(e) => setMetronomeBPM(parseInt(e.target.value))}
-                      className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
+                      className="w-full h-1.5 bg-purple-200 rounded-lg appearance-none cursor-pointer slider"
                       disabled={!isMetronomeOn}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Songs Section for Mobile */}
-              <div className="bg-gradient-to-r from-emerald-900/40 to-teal-900/40 rounded-lg p-2">
-                <h3 className="text-sm font-semibold text-white mb-2 text-center">Sample Songs</h3>
+              <div className="bg-white/80 border border-purple-200 rounded-lg p-2 shadow-sm">
+                <h3 className="text-xs font-bold text-slate-800 mb-2 text-center">Sample Songs</h3>
                 <div className="grid grid-cols-2 gap-1.5">
                   {Object.keys(sampleSongs).map(songName => (
                     <button
                       key={songName}
                       onClick={() => handleSongSelect(songName)}
                       className={`
-                        p-2 rounded-lg font-medium transition-all duration-200 text-xs
+                        p-2 rounded-lg font-bold transition-all duration-200 text-[10px] text-center
                         ${currentSong === songName
-                          ? 'bg-emerald-600 text-white shadow-lg'
-                          : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
+                          ? 'bg-purple-600 text-white shadow-md'
+                          : 'bg-purple-50 text-purple-800 border border-purple-100'
                         }
                       `}
                     >
@@ -531,7 +500,7 @@ function App() {
             </div>
           )}
 
-          {/* Musical Score - Responsive Column */}
+          {/* Musical Score - Dark Section Preserved */}
           <div className="lg:col-span-2 flex-1 min-h-0">
             <MusicalScore
               currentSong={currentSong}
@@ -553,8 +522,8 @@ function App() {
           </div>
         </div>
 
-        {/* Piano Component - Always at bottom */}
-        <div className="mt-2">
+        {/* Piano Component */}
+        <div className="mt-2 bg-white/50 p-2 rounded-xl border border-purple-200 shadow-sm">
           <Piano
             activeNotes={activeNotes}
             onNotePlay={playNote}
@@ -571,8 +540,8 @@ function App() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-2 text-purple-300 text-xs">
-          <p className="hidden sm:block">Use your keyboard to play notes • Hold Shift for sharps • Hold Alt/Option for flats | Develop By Sadrita Neogi ( Hack Club )</p>
+        <div className="text-center mt-2 text-purple-900 text-[10px] font-bold uppercase tracking-wider">
+          <p className="hidden sm:block">| Develop By Sadrita Neogi ( Hack Club ) |  </p>
           <p className="sm:hidden">Tap piano keys to play • Use keyboard for desktop</p>
         </div>
       </div>
