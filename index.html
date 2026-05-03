@@ -1,13 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Key - Piano - MIDI Keyboard Player with Computer Key Mapping</title>
-    <meta name="description" content="By Sadrita Neogi" />
+    <title>Key - Piano - MIDI Keyboard Player</title>
+    <meta name="description" content="By Sadrita Neogi ( Hack Club )" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+
+      .hc-flag {
+        position: absolute;
+        top: 0;
+        left: 20px;
+        z-index: 999;
+        /* Smooth movement when hovering */
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .hc-flag img {
+        /* Adjusted width for a smaller, cleaner look */
+        width: 120px;
+        border: 0;
+      }
+
+      .hc-flag:hover {
+        transform: translateY(4px);
+      }
+    </style>
   </head>
   <body>
+    <a href="https://hackclub.com/" class="hc-flag">
+      <img src="https://assets.hackclub.com/flag-orpheus-top.svg" alt="Hack Club" />
+    </a>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

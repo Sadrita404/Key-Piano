@@ -328,7 +328,7 @@ function App() {
             <Music className="w-5 h-5 text-purple-400" />
             <h1 className="text-xl font-bold text-white">Key-Piano</h1>
           </div>
-          <p className="text-xs text-purple-200">Play music using your computer keyboard By Sadrita Neogi</p>
+          <p className="text-xs text-purple-200">Play music using your computer keyboard By Sadrita Neogi ( Hack Club )</p>
         </div>
 
         {/* Mobile Controls Toggle */}
@@ -572,7 +572,7 @@ function App() {
 
         {/* Footer */}
         <div className="text-center mt-2 text-purple-300 text-xs">
-          <p className="hidden sm:block">Use your keyboard to play notes • Hold Shift for sharps • Hold Alt/Option for flats | Develop By Sadrita Neogi</p>
+          <p className="hidden sm:block">Use your keyboard to play notes • Hold Shift for sharps • Hold Alt/Option for flats | Develop By Sadrita Neogi ( Hack Club )</p>
           <p className="sm:hidden">Tap piano keys to play • Use keyboard for desktop</p>
         </div>
       </div>
