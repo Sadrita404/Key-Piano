@@ -415,7 +415,7 @@ function App() {
         {/* Footer */}
         <div className="text-center mt-4 text-slate-500">
           <p className="text-[9px] font-black uppercase tracking-[0.2em] border-t border-slate-300 pt-2">
-           |  DESIGNED BY SADRITA NEOGI ( HACK CLUB ) | 
+           |  DESIGNED BY SADRITA NEOGI | Hold Shift for sharps (#) or Alt/Option for flats (♭) | 
           </p>
         </div>
       </div>
