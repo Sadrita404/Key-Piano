@@ -120,6 +120,14 @@ export const sampleSongs = {
 
 ## Poject Screenshot
 
+<img width="1920" height="1080" alt="Key Piano" src="https://github.com/user-attachments/assets/ac7302e5-e580-4300-aaf8-1bd6028b4011" />
+
+
+
+
+
+---
+
 <img width="1439" height="716" alt="Screenshot 2026-05-03 at 12 07 51 PM" src="https://github.com/user-attachments/assets/29efabe3-5d28-442c-87a3-b96ccb31b16a" />
 
 
