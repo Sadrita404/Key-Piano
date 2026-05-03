@@ -13,25 +13,24 @@
         margin: 0;
         padding: 0;
         overflow-x: hidden;
-        /* Matches the background color of your App.tsx */
         background-color: #F3E8FF; 
       }
 
       .hc-flag-container {
         position: absolute;
         top: 0;
-        left: 10px;
+        left: 0; /* Snug to the edge looks better for small flags */
         z-index: 999;
-        transition: transform 0.1s steps(2); /* Retro "stutter" animation */
+        transition: transform 0.1s steps(2);
       }
 
       .hc-flag-container img {
-        width: 256px;
+        /* Reduced from 256px to 120px for a cleaner, smaller look */
+        width: 120px; 
         border: 0;
         display: block;
       }
 
-      /* Hover effect that feels more mechanical/retro */
       .hc-flag-container:hover {
         transform: translateY(2px);
       }
