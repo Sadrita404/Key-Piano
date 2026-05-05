@@ -19,7 +19,12 @@ const pianoKeyLayout = [
   { note: 'A', computerKey: 'h', type: 'white' },
   { note: 'B', computerKey: 'j', type: 'white' },
   // Black Keys (with corresponding flat notes)
- 
+  { note: 'C#', flatNote: 'Db', computerKey: 'w', type: 'black', position: 0.7 },
+  { note: 'D#', flatNote: 'Eb', computerKey: 'e', type: 'black', position: 1.7 },
+  { note: 'F#', flatNote: 'Gb', computerKey: 't', type: 'black', position: 3.7 },
+  { note: 'G#', flatNote: 'Ab', computerKey: 'y', type: 'black', position: 4.7 },
+  { note: 'A#', flatNote: 'Bb', computerKey: 'u', type: 'black', position: 5.7 },
+];
 
 export const KeyboardHint: React.FC<KeyboardHintProps> = ({
   targetNote,
